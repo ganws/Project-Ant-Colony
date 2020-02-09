@@ -3,6 +3,7 @@
 Project to simulate ant colony with hormone system.
 
 =====ROUGH IDEAS=====
+
 Ant movement system:
   - An ant's movement is defined by an probability equation which takes pheromone level as input parameter.
   - pathing coefficient is 0 when the grid is occupied by a path blocker
