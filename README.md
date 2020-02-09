@@ -23,3 +23,8 @@ Ant sensory system
 Path blocking system
   - An invisible square object is the basic building block for path blocking, known as path blocker.
   - the pathing of every object constitutes smaller path blockers. 
+
+Ant State and Activity
+ - Ant's current state can be explained as the action of the ant at any given momemnt. 
+ - Activity is the defining behaviour of an ant. Ant can only be in ONE activity at any given moment.
+ - eg. FORAGING activity put ants into 'walking' and 'carrying food' states.
