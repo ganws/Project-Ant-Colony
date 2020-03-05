@@ -7,7 +7,10 @@
 #include "PheromoneSystem.h"
 #include "PathBlocker.h"
 #include "drawMapBoundary.h"
+#include "Colony.h"
+#include "Hashit.h"
 
+#include<fstream>
 #include<SFML/Graphics.hpp>
 #include<SFML/Window.hpp>
 
@@ -20,6 +23,21 @@ int main()
 
 	float timeElapsed{ 0.0f };
 	float randTime{ 0.0f };
+	std::string USER_INPUT;
+	//=====LOAD COMMAND LIST=======//
+	std::string line;
+	std::string command_list;
+	std::ifstream command_list_file("command_list.md");
+	if (command_list_file.is_open())
+	{
+		while (std::getline(command_list_file, line))
+		{
+			command_list.append(line);
+			command_list.push_back('\n');
+		}
+		command_list_file.close();
+			std::cout << command_list;
+	}
 
 	//======CREATE PHEROMONE SYSTEM=====
 	PheromoneSystem pheromones(10000); //fixed 10k particles. beyond that game will crash
@@ -36,6 +54,9 @@ int main()
 
 	drawMapBoundary(&pblock_system);
 
+	//======CREATE COLONY==========//
+	Colony Colony1;
+	Colony1.initColony(&pblock_system);
 	
 	//======CREATE ANTS========//
 	Ant ant1(&pblock_system);
@@ -58,6 +79,7 @@ int main()
 			randTime = 0.0f;
 		}
 
+	
 
 		sf::Event event;
 
@@ -76,7 +98,7 @@ int main()
 				view.move(-4.0f, 0.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 				view.move(4.0f, 0.0f);
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 				view.reset(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
 
 			// issue move command
@@ -93,7 +115,51 @@ int main()
 				ant1.issue_move_command(sf::Vector2f(ClickPos.x,ClickPos.y));
 
 			}
+			// DETECT STRING COMMAND
+			if (event.type == sf::Event::TextEntered)	
+			{
+				if (event.text.unicode < 128 && event.text.unicode!=13 && event.text.unicode != 8)
+				{
+					char tmpChar{static_cast<char>(event.text.unicode)};
+					USER_INPUT.push_back(tmpChar);
+					std::cout << tmpChar;
+				}
+			}
 
+			if ((!USER_INPUT.empty())&&(sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace)))
+			{
+				USER_INPUT.pop_back();
+				std::cout << "\b \b";
+			}
+			// ENTER COMMAND
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+
+			{
+				if (!USER_INPUT.empty()) 
+				{
+					std::cout << "\n";
+					switch (Parse(USER_INPUT))
+					{
+					case TEXT_COMMAND::EXIT:
+						std::cout << "COMMAND: Exit";
+						break;
+
+					case TEXT_COMMAND::CREATE_ANT:
+						std::cout << "COMMAND: Create ant";
+						break;
+
+					case TEXT_COMMAND::HELP:
+						std::cout << command_list;
+						break;
+
+					default:
+						std::cout << "COMMAND: Unknown";
+					}
+					std::cout << "\n";
+					USER_INPUT.clear();
+
+				}
+			}
 		}
 
 		// update frame	
@@ -113,6 +179,7 @@ int main()
 
 		//draw
 		window.draw(ant1); 
+	
 		ant1.drawSensoryCircle(&window);
 		window.draw(pheromones);
 		for (auto n : pblock_system)
@@ -122,7 +189,9 @@ int main()
 		sf::View currentView = window.getView();
 		randTime += timeElapsed;
 
+
 	}
+
 
 	return 0;
 }

@@ -7,6 +7,10 @@ Ant::Ant(std::vector<PathBlocker>* arg_pblock_system)
 {
 	pblocker_systm_ptr = arg_pblock_system;
 };
+Ant::Ant(const Ant& obj)
+{
+}
+
 Ant::~Ant() {}; //destructor
 
 

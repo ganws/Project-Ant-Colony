@@ -14,8 +14,6 @@ PheromoneSystem::PheromoneSystem(unsigned int count):
 		m_empty_indx[i] = i;
 		m_particle[i].m_active_status = false;
 		m_particle[i].m_pstrength = 0.0f;
-		//m_vertices[i].color=sf::Color::Red;
-		//m_vertices[i].color.a = 0.0f;
 	}
 }
 
@@ -37,9 +35,7 @@ void PheromoneSystem::decay(float dt)
 			}
 			//=======VISUAL UPDATE======
 			float alpha = p.m_pstrength / m_initial_strength;
-			//sf::Color tempColor = m_particle[i].getFillColor();
-			//tempColor.a = static_cast<sf::Uint8>(alpha);
-			//m_vertices[i].color.a = static_cast<sf::Uint8>(alpha * 255);
+
 			
 			sf::Color tmpColor = m_pvisual[i].getFillColor();
 			tmpColor.a = static_cast<sf::Uint8>(alpha * 255);

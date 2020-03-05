@@ -60,6 +60,12 @@
     <ClCompile Include="GameSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Colony.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hashit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ant.h">
@@ -104,6 +110,12 @@
     <ClInclude Include="drawMapBoundary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Colony.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hashit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Project Ant Colony.rc">
@@ -114,5 +126,8 @@
     <Image Include="..\Resource\Ants\walk.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="command_list.md" />
   </ItemGroup>
 </Project>

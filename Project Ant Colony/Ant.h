@@ -45,6 +45,7 @@ public:
 
 	//constructor, destructor
 	Ant(std::vector<PathBlocker> *pblock_systm); //constructor
+	Ant(const Ant& obj);
 	~Ant(); //destructor
 
 	void initAnt(float size, sf::Vector2f init_pos, sf::Texture &texture);	
