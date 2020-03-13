@@ -5,6 +5,7 @@
 #include"PheromoneSystem.h"
 #include "VectorFunction.h"
 #include "PathBlocker.h"
+#include "Animation.h"
 
 #include<random>
 #include<math.h>
@@ -44,12 +45,13 @@ public:
 public:
 
 	//constructor, destructor
-	Ant(std::vector<PathBlocker> *pblock_systm); //constructor
+	Ant();
+	//Ant(std::vector<PathBlocker> *pblock_systm); //constructor
 	Ant(const Ant& obj);
 	~Ant(); //destructor
 
-	void initAnt(float size, sf::Vector2f init_pos, sf::Texture *texture);	
-	void updateMovement(float dt);
+	void initAnt(float size, sf::Vector2f init_pos, sf::Texture *texture, std::vector<PathBlocker>* arg_pblock_system);
+	void updateMovement(float dt, std::vector<PathBlocker>* path_blck_ptr);
 	void secretPheromon(float dt, PheromoneSystem *psystem); //secret pheromone on spot
 	void sensePheromone(); //sense pheromones around the ant
 	void drawSensoryCircle(sf::RenderWindow* window);
@@ -71,5 +73,7 @@ public:
 private:
 	State m_state{}; //reflects the states of ants
 	Activity m_activity{}; //ant can only engage in one activity at one time
+	Animation ant_animation;
+	
 
 };

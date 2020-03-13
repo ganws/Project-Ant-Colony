@@ -162,8 +162,8 @@ void SensoryInput::updateWeight(std::vector<PathBlocker>* path_blck_ptr)
 		m_sensory_circle[n].coeff_weight = 0.1;
 		m_sensory_circle[n].coeff_pathing = 1.0;
 		//check pathblockers
-		for (auto m = path_blck_ptr->begin(); m != path_blck_ptr->end(); m++)
-			if (m_sensory_circle[n].getGlobalBounds().intersects((*m).getGlobalBounds()))
+		for (auto &m : *path_blck_ptr)
+			if (m_sensory_circle[n].getGlobalBounds().intersects((m).getGlobalBounds()))
 			{
 				m_sensory_circle[n].coeff_pathing = 0.0;
 				std::cout << "Path block detected" << "\n"; //debug

@@ -3,13 +3,12 @@
 //member funciton definition
 
 //constructor
-Ant::Ant(std::vector<PathBlocker>* arg_pblock_system) 
-{
-	pblocker_systm_ptr = arg_pblock_system;
-};
-Ant::Ant(const Ant& obj)
-{
-}
+Ant::Ant() {};
+//Ant::Ant(std::vector<PathBlocker>* arg_pblock_system) 
+//{
+//	pblocker_systm_ptr = arg_pblock_system;
+//};
+Ant::Ant(const Ant& obj){}
 
 Ant::~Ant() {}; //destructor
 
@@ -22,7 +21,7 @@ void Ant::issue_move_command(sf::Vector2f coordinate)
 	
 	sf::Vector2f yUnitVector{ 0.0f, -1.0f };
 	sf::Vector2f xUnitVector{ 1.0f, 0.0f };
-	float faceAngle = vectorAngle(yUnitVector, moveVector)*180.0f/constants::pi;
+	float faceAngle = vectorAngle(yUnitVector, moveVector)*180.0/constants::pi;
 
 	float cosX = dotProduct(xUnitVector, moveVector) / (normVector(moveVector) * normVector(xUnitVector));
 
@@ -41,7 +40,7 @@ void Ant::issue_face_command(float facingAngle)
 
 
 // frame update
-void Ant::updateMovement(float dt)
+void Ant::updateMovement(float dt, std::vector<PathBlocker>* path_blck_ptr)
 {	
 	// translation
 
@@ -79,12 +78,17 @@ void Ant::updateMovement(float dt)
 			rotate(rotateDirection * m_rotatespeed * dt);
 		//std::cout << getRotation() << "\n";
 	}
+	//sensory
 	m_sensory_input.updateFaceIndex(this->getRotation());
-	m_sensory_input.updateWeight(pblocker_systm_ptr);
+	m_sensory_input.updateWeight(path_blck_ptr);
 
 	int target_circle_indx = computeMoveTarget();
 	sf::Vector2f targetLoc =  m_sensory_input.m_sensory_circle[target_circle_indx].getPosition();
 	issue_move_command(targetLoc);
+
+	//update animation
+	ant_animation.Update(dt);
+	this->setTextureRect(ant_animation.m_uvRect);
 }
 void Ant::secretPheromon(float dt, PheromoneSystem* psystem)
 {
@@ -130,13 +134,13 @@ void Ant::setMoveSpeed(float movespeed)
 	this->m_movespeed = movespeed;
 }
 
-void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin)
+void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vector<PathBlocker>* arg_pblock_system)
 {
 
 	//Texture and size
 	int skin_length = skin->getSize().x / 8; // length of single frame from animation
 	int skin_height = skin->getSize().y / 8; // height of single frame from animation
-	setTexture(*skin);
+	this->setTexture(*skin);
 	setTextureRect(sf::IntRect(0, 0, skin_length, skin_height));
 	setOrigin(skin_length / 2, skin_height / 2);
 	setScale(size, size);
@@ -145,10 +149,16 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin)
 	m_size.x = getLocalBounds().height;
 	m_size.y = getLocalBounds().width;
 
+	pblocker_systm_ptr = arg_pblock_system; //path block system
+
 	//state init
 	//m_activity = Activity::IDLE; //init
 	m_sensory_input.setPos(init_pos.x , init_pos.y);
 	this->issue_move_command(init_pos);
+
+	//Animation
+	ant_animation.InitAnimation(skin, sf::Vector2u(8, 8), 62, 0.01);
+	std::cout << "Ant initialized, pblock ptr=" << pblocker_systm_ptr << "\n";
 }
 
 int Ant::computeMoveTarget()

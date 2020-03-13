@@ -4,21 +4,22 @@
 class Animation
 {
 public:
-	Animation(sf::Texture* texture, sf::Vector2u ImageCount, int imageRealCount, float switchTime);
+	//Animation(sf::Texture* texture, sf::Vector2u ImageCount, int imageRealCount, float switchTime);
+	Animation();
 	~Animation();
-
+	void InitAnimation(sf::Texture* texture, sf::Vector2u imageCount, int imageRealCount, float switchTime);
 	void Update(float deltaTime);
 
 public:
-	sf::IntRect m_uvRect;
+	sf::IntRect m_uvRect{};
 
 private:
-	sf::Vector2u m_imageCount;
-	int m_imageRealCount;
-	int m_currentIndex;
-	sf::Vector2u m_currentImage;
+	sf::Vector2u m_imageCount{};
+	int m_imageRealCount{};
+	int m_currentIndex{};
+	sf::Vector2u m_currentImage{};
 
-	float m_totalTime;
-	float m_switchTime;
+	float m_totalTime{};
+	float m_switchTime{};
 };
 

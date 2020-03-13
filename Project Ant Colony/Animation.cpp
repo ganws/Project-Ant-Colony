@@ -1,9 +1,12 @@
 #include "Animation.h"
 
-Animation::Animation(sf::Texture* texture, sf::Vector2u imageCount, int imageRealCount, float switchTime)
+Animation::Animation() {}
+Animation::~Animation() {}
+
+void Animation::InitAnimation(sf::Texture* texture, sf::Vector2u imageCount, int imageRealCount, float switchTime)
 {
 	this->m_imageCount = imageCount;
-	this-> m_imageRealCount = imageRealCount;
+	this->m_imageRealCount = imageRealCount;
 	this->m_switchTime = switchTime;
 	m_totalTime = 0.0f;
 	m_currentIndex = 0;
@@ -11,8 +14,6 @@ Animation::Animation(sf::Texture* texture, sf::Vector2u imageCount, int imageRea
 	m_uvRect.width = texture->getSize().x / float(imageCount.x);
 	m_uvRect.height = texture->getSize().y / float(imageCount.y);
 }
-
-Animation::~Animation() {}
 
 void Animation::Update(float deltaTime)
 {

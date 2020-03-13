@@ -15,8 +15,8 @@ public:
 	//method
 	void addAnt(sf::Vector2f spwn_loc);
 	void removeAnt();
-	void computeAntMove();
-	void initColony(std::vector<PathBlocker>* pb_ptr, sf::Texture *ant_skin_mian);
+	void computeAntMove(float dt);
+	void initColony(std::vector<PathBlocker>* pb_ptr, sf::Texture *ant_skin_mian, PheromoneSystem* pher_ptr_input);
 	void updateAntNum();
 	void drawColony(sf::RenderWindow* window);
 	int getAntNum();
@@ -24,5 +24,6 @@ public:
 private:
 	int ant_num{0};
 	std::vector<PathBlocker>* pblocker_systm_ptr{ nullptr };
+	PheromoneSystem* pheromones_ptr { nullptr };
 
 };

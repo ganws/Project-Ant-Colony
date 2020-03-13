@@ -44,6 +44,7 @@ int main()
 
 	//======LOAD TEXTURE========//
 	sf::Texture skin;
+	std::cout << &skin << "\n";
 	if (!skin.loadFromFile("walk.png"))
 		std::cout << "unable to load skin. \n";
 
@@ -56,17 +57,8 @@ int main()
 
 	//======CREATE COLONY==========//
 	Colony Colony1;
-	Colony1.initColony(&pblock_system, &skin);
-	
-	//======CREATE ANTS========//
-	Ant ant1(&pblock_system);
-	ant1.initAnt(0.1, sf::Vector2f(GameSetting::windowHeight / 2, GameSetting::windowWidth / 2), &skin);
+	Colony1.initColony(&pblock_system, &skin, &pheromones);
 
-	//======ANIMATION=========//
-
-	Animation walk_animation(&skin, sf::Vector2u(8, 8), 62, 0.01);
-
-	
 	////=====WINDOW=======//
 	while (window.isOpen())
 	{
@@ -75,7 +67,6 @@ int main()
 		{
 			float randLoc = static_cast<float>(rand() / static_cast<float>(RAND_MAX)* GameSetting::windowHeight);
 			float randLoc2 = static_cast<float>(rand() / static_cast<float>(RAND_MAX)* GameSetting::windowHeight);
-			//ant1.issue_move_command(sf::Vector2f(randLoc, randLoc2));
 			randTime = 0.0f;
 		}
 
@@ -112,7 +103,6 @@ int main()
 			{
 
 				sf::Vector2i ClickPos = sf::Mouse::getPosition(window);
-				ant1.issue_move_command(sf::Vector2f(ClickPos.x,ClickPos.y));
 
 			}
 			// DETECT STRING COMMAND
@@ -153,6 +143,14 @@ int main()
 						std::cout << command_list;
 						break;
 
+					case TEXT_COMMAND::ANTNUM:
+						std::cout << Colony1.getAntNum() << "\n";
+						break;
+
+					case TEXT_COMMAND::ANTSKIN:
+						std::cout << Colony1.ant_skin << "\n";
+						break;
+
 					default:
 						std::cout << "COMMAND: Unknown";
 					}
@@ -165,17 +163,7 @@ int main()
 
 		// update frame	
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
-
-		ant1.updateMovement(timeElapsed);
-		ant1.secretPheromon(timeElapsed, &pheromones);
-		ant1.m_sensory_input.detectPheromone(&pheromones);
-		
-		walk_animation.Update(timeElapsed);
-		ant1.setTextureRect(walk_animation.m_uvRect);
-		if (Colony1.getAntNum() != 0)
-		{
-			Colony1.AntContainer[0].setTextureRect(walk_animation.m_uvRect);
-		}
+		Colony1.computeAntMove(timeElapsed);
 
 		pheromones.decay(timeElapsed);
 
@@ -184,17 +172,10 @@ int main()
 		window.clear(sf::Color::White);
 
 		//draw
-		window.draw(ant1); 
 		Colony1.drawColony(&window);
-		ant1.drawSensoryCircle(&window);
-		if (Colony1.getAntNum() != 0)
-		{
-			window.draw(Colony1.AntContainer[0]);
-		}
 		window.draw(pheromones);
-		//for (auto a : Colony1.AntContainer)
-		//	window.draw(a);
-		for (auto n : pblock_system)
+
+		for (auto &n : pblock_system)
 			window.draw(n);
 		window.display();
 		
