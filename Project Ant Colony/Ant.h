@@ -48,7 +48,7 @@ public:
 	Ant(const Ant& obj);
 	~Ant(); //destructor
 
-	void initAnt(float size, sf::Vector2f init_pos, sf::Texture &texture);	
+	void initAnt(float size, sf::Vector2f init_pos, sf::Texture *texture);	
 	void updateMovement(float dt);
 	void secretPheromon(float dt, PheromoneSystem *psystem); //secret pheromone on spot
 	void sensePheromone(); //sense pheromones around the ant

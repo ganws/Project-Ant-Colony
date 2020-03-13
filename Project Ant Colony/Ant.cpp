@@ -130,13 +130,13 @@ void Ant::setMoveSpeed(float movespeed)
 	this->m_movespeed = movespeed;
 }
 
-void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture &skin)
+void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin)
 {
 
 	//Texture and size
-	int skin_length = skin.getSize().x / 8; // length of single frame from animation
-	int skin_height = skin.getSize().y / 8; // height of single frame from animation
-	setTexture(skin);
+	int skin_length = skin->getSize().x / 8; // length of single frame from animation
+	int skin_height = skin->getSize().y / 8; // height of single frame from animation
+	setTexture(*skin);
 	setTextureRect(sf::IntRect(0, 0, skin_length, skin_height));
 	setOrigin(skin_length / 2, skin_height / 2);
 	setScale(size, size);

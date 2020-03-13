@@ -5,22 +5,24 @@
 class Colony
 {
 public:
-	int ant_num{};
 
 	//constructor and destructor
 	Colony();
 	~Colony();
+	sf::Texture* ant_skin;
+	std::vector<Ant> AntContainer;
 
 	//method
-	void initColony();
 	void addAnt(sf::Vector2f spwn_loc);
 	void removeAnt();
 	void computeAntMove();
-	void initColony(std::vector<PathBlocker>* pb_ptr);
+	void initColony(std::vector<PathBlocker>* pb_ptr, sf::Texture *ant_skin_mian);
+	void updateAntNum();
+	void drawColony(sf::RenderWindow* window);
+	int getAntNum();
 
 private:
-	sf::Texture ant_skin;
-	std::vector<Ant> AntContainer;
+	int ant_num{0};
 	std::vector<PathBlocker>* pblocker_systm_ptr{ nullptr };
 
 };

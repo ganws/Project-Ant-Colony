@@ -56,11 +56,11 @@ int main()
 
 	//======CREATE COLONY==========//
 	Colony Colony1;
-	Colony1.initColony(&pblock_system);
+	Colony1.initColony(&pblock_system, &skin);
 	
 	//======CREATE ANTS========//
 	Ant ant1(&pblock_system);
-	ant1.initAnt(0.1, sf::Vector2f(GameSetting::windowHeight / 2, GameSetting::windowWidth / 2), skin);
+	ant1.initAnt(0.1, sf::Vector2f(GameSetting::windowHeight / 2, GameSetting::windowWidth / 2), &skin);
 
 	//======ANIMATION=========//
 
@@ -146,6 +146,7 @@ int main()
 
 					case TEXT_COMMAND::CREATE_ANT:
 						std::cout << "COMMAND: Create ant";
+						Colony1.addAnt(sf::Vector2f(GameSetting::windowWidth / 2, GameSetting::windowHeight/ 2));
 						break;
 
 					case TEXT_COMMAND::HELP:
@@ -171,6 +172,11 @@ int main()
 		
 		walk_animation.Update(timeElapsed);
 		ant1.setTextureRect(walk_animation.m_uvRect);
+		if (Colony1.getAntNum() != 0)
+		{
+			Colony1.AntContainer[0].setTextureRect(walk_animation.m_uvRect);
+		}
+
 		pheromones.decay(timeElapsed);
 
 		//clear window 
@@ -179,9 +185,15 @@ int main()
 
 		//draw
 		window.draw(ant1); 
-	
+		Colony1.drawColony(&window);
 		ant1.drawSensoryCircle(&window);
+		if (Colony1.getAntNum() != 0)
+		{
+			window.draw(Colony1.AntContainer[0]);
+		}
 		window.draw(pheromones);
+		//for (auto a : Colony1.AntContainer)
+		//	window.draw(a);
 		for (auto n : pblock_system)
 			window.draw(n);
 		window.display();
