@@ -66,6 +66,9 @@
     <ClCompile Include="Hashit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PheroMatrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ant.h">
@@ -114,6 +117,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Hashit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PheroMatrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

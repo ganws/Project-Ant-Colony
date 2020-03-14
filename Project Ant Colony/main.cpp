@@ -9,10 +9,12 @@
 #include "drawMapBoundary.h"
 #include "Colony.h"
 #include "Hashit.h"
+#include "PheroMatrix.h"
 
 #include<fstream>
 #include<SFML/Graphics.hpp>
 #include<SFML/Window.hpp>
+#include<SFML/OpenGL.hpp>
 
 int main()
 {
@@ -20,6 +22,7 @@ int main()
 	window.setFramerateLimit(GameSetting::FRAMERATE);
 	sf::View view(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
 	sf::Clock gameclock;
+
 
 	float timeElapsed{ 0.0f };
 	float randTime{ 0.0f };
@@ -41,6 +44,11 @@ int main()
 
 	//======CREATE PHEROMONE SYSTEM=====
 	PheromoneSystem pheromones(10000); //fixed 10k particles. beyond that game will crash
+	PheroMatrix PheroTiles;
+
+	//======CREATE PHEROMONE SYSTEM 2=====
+	PheroTiles.initPheroMatrix(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(400, 400)); //gamesetting: 1500x1000
+
 
 	//======LOAD TEXTURE========//
 	sf::Texture skin;
@@ -97,12 +105,15 @@ int main()
 			{
 				
 				sf::Vector2i ClickPos = sf::Mouse::getPosition(window);
-				pheromones.createParticle(sf::Vector2f(ClickPos.x, ClickPos.y), Activity::GATHERING);
+				sf::Vector2f worldPos = window.mapPixelToCoords(ClickPos);
+				//pheromones.createParticle(sf::Vector2f(worldPos.x, worldPos.y), Activity::GATHERING);
+				PheroTiles.addStrength(worldPos, 100.0f);
 			}
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 			{
 
 				sf::Vector2i ClickPos = sf::Mouse::getPosition(window);
+				sf::Vector2f worldPos = window.mapPixelToCoords(ClickPos);
 
 			}
 			// DETECT STRING COMMAND
@@ -164,7 +175,7 @@ int main()
 		// update frame	
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
 		Colony1.computeAntMove(timeElapsed);
-
+		PheroTiles.pheromoneDecay(timeElapsed);
 		pheromones.decay(timeElapsed);
 
 		//clear window 
@@ -172,6 +183,7 @@ int main()
 		window.clear(sf::Color::White);
 
 		//draw
+		window.draw(PheroTiles);
 		Colony1.drawColony(&window);
 		window.draw(pheromones);
 

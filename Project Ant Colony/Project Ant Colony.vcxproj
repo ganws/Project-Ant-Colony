@@ -29,6 +29,7 @@
     <ClCompile Include="Hashit.cpp" />
     <ClCompile Include="PathBlocker.cpp" />
     <ClCompile Include="PathBlockerContainer.cpp" />
+    <ClCompile Include="PheroMatrix.cpp" />
     <ClCompile Include="Pheromone.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PheromoneSystem.cpp" />
@@ -48,6 +49,7 @@
     <ClInclude Include="Hashit.h" />
     <ClInclude Include="PathBlocker.h" />
     <ClInclude Include="PathBlockerContainer.h" />
+    <ClInclude Include="PheroMatrix.h" />
     <ClInclude Include="Pheromone.h" />
     <ClInclude Include="PheromoneSystem.h" />
     <ClInclude Include="SensoryCircle.h" />
