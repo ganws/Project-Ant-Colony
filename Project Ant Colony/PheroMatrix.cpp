@@ -61,14 +61,9 @@ void PheroMatrix::pheromoneDecay(float dt)
 		{
 			{
 				float& str = m_strengthmatrix[i + j * m_resolution.x];
-				if (str >= 0.1)
-				{
-					str = str - m_decay_rate * dt;
-				}
-				else if (str <= 0)
-				{
+				str = str - m_decay_rate * dt;
+				if (str <= 0)
 					str = 0.0;
-				}
 
 				alpha = str / (m_initial_strength*5) ; //maximum opacity= 5 stacked instances
 				if (alpha > 1.0) alpha = 1.0; 

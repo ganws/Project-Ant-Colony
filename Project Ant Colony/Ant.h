@@ -21,14 +21,14 @@ class Ant: public sf::Sprite
 public:
 
 	//constant states
-	float m_movespeed{ 120.0f }; //movespeed in pixel per second
+	float m_movespeed{ 150.0f }; //movespeed in pixel per second
 	float m_rotatespeed{ 530.0f }; //degree per sec;
 	float m_HP{}; //hitpoint
 	float m_attack{}; //attack
 	float m_dmgtaken{}; // dmg taken per timestep
 	sf::Vector2f m_size; //ant size
 	float m_age{}; //age [days]
-	float m_pheromon_period{0.05f}; //pheromon secreting  period [s]
+	float m_pheromon_period{0.03f}; //pheromon secreting  period [s]
 	float m_internal_clock{0.0f}; // for various counting
 
 	bool collision_check{false}; //true:check collision
@@ -82,7 +82,7 @@ public:
 private:
 
 	//sensors
-	std::vector<float> m_Ci; //strength of sensor
+	std::vector<unsigned int> m_Ci; //strength of sensor
 	unsigned int m_sensorNumPerSide{ 3 }; //sensors per side
 	float m_sensorSpacing{ 5 }; // space between sensor
 	std::vector<sf::Vector2f> m_sensorPosition; // sensor positions

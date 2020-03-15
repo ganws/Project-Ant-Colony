@@ -68,7 +68,7 @@ void Colony::computeAntMove(float dt)
 		//		if (p.getGlobalBounds().intersects(n.getGlobalBounds()))
 		//		{
 		//			sf::Vector2f faceVector = n.getPosition()-p.getPosition();
-		//			n.issue_move_command(sf::Vector2f(500,500));
+		//			n.issue_mov	e_command(sf::Vector2f(500,500));
 		//		}
 		//	}
 		//}

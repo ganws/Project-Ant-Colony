@@ -152,7 +152,7 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vec
 	SensoryTracker.setOrigin(2.5, 2.5);
 
 	m_sensorPosition.resize(m_sensorNumPerSide * 2 + 1); //include the middle sensor
-	m_Ci.resize(m_sensorNumPerSide*2 +1); //set size
+	m_Ci.resize(m_sensorNumPerSide*2 +1);
 
 	//Texture and size
 	int skin_length = skin->getSize().x / 8; // length of single frame from animation
@@ -264,17 +264,17 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 	// populate all Ci
 	for (int i = 0;i < sensorTotalNum; i++)
 	{
-		m_Ci[i] = 1.0;
+		m_Ci[i] = 5.0;
 		m_Ci[i] += pheroMat->getStrengh(m_sensorPosition[i]);
 
-		/*if (collision_check)
+		if (collision_check)
 		{
 			for (auto& pb : *pblocker_systm_ptr)
 			{
 				if (pb.getGlobalBounds().contains(m_sensorPosition[i]))
 					m_Ci[i] = 0;
 			}
-		}*/
+		}
 		sum_C += m_Ci[i];
 	}
 
@@ -282,10 +282,13 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 	if (sum_C <= constants::near_zero)
 		return sf::Vector2f(500, 500);
 
-	//create discrete distribution
-	std::discrete_distribution<int> str_PDistrib(m_Ci.begin(), m_Ci.end());
+	/////////////////////////////////////////////
+	//-------------DECISION MAKING-------------//
 
-	//decision making
+	//create discrete distribution
+
+	std::discrete_distribution<> str_PDistrib(m_Ci.begin(), m_Ci.end());
+
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	int moveToIndex = str_PDistrib(gen);
