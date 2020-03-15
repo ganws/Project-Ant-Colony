@@ -1,6 +1,7 @@
 #pragma once
 #include<sfml/Graphics.hpp>
 #include<vector>
+#include <iostream>
 
 class PheroMatrix : public sf::Drawable
 {
@@ -11,6 +12,8 @@ public:
 	void setDecayRate(float value_set);
 	void pheromoneDecay(float dt);
 	void addStrength(sf::Vector2f worldPos , float input_str);
+	float getStrengh(sf::Vector2f worldPos); 
+	sf::Vector2u mapCoordsToPos(sf::Vector2f worldPos);
 
 private:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -18,7 +21,6 @@ private:
 		// draw the vertex array
 		target.draw(m_tilevertices, states);
 	}
-	sf::Vector2u mapCoordsToPos(sf::Vector2f worldPos);
 
 	int m_tile_width;
 	int m_tile_height;

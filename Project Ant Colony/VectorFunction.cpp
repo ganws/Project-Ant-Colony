@@ -21,3 +21,8 @@ sf::Vector2f unitVector(sf::Vector2f v)
 {
 	return v / sqrt(v.x * v.x + v.y * v.y);
 }
+
+sf::Vector2f scalarProduct(sf::Vector2f v, float scalar)
+{
+	return sf::Vector2f(v.x * scalar, v.y * scalar);
+}

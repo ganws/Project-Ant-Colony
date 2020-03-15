@@ -23,6 +23,8 @@ int main()
 	sf::View view(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
 	sf::Clock gameclock;
 
+	std::cout << static_cast<bool>(1200%7 + 1200%300) << "\n";
+
 
 	float timeElapsed{ 0.0f };
 	float randTime{ 0.0f };
@@ -47,8 +49,7 @@ int main()
 	PheroMatrix PheroTiles;
 
 	//======CREATE PHEROMONE SYSTEM 2=====
-	PheroTiles.initPheroMatrix(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(400, 400)); //gamesetting: 1500x1000
-
+	PheroTiles.initPheroMatrix(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(300, 300)); //gamesetting: 1200x1200	
 
 	//======LOAD TEXTURE========//
 	sf::Texture skin;
@@ -65,7 +66,7 @@ int main()
 
 	//======CREATE COLONY==========//
 	Colony Colony1;
-	Colony1.initColony(&pblock_system, &skin, &pheromones);
+	Colony1.initColony(&pblock_system, &skin, &pheromones, &PheroTiles);
 
 	////=====WINDOW=======//
 	while (window.isOpen())
@@ -99,6 +100,9 @@ int main()
 				view.move(4.0f, 0.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 				view.reset(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+				Colony1.addAnt(sf::Vector2f(GameSetting::windowWidth / 2, GameSetting::windowHeight / 2));
+				
 
 			// issue move command
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -185,7 +189,7 @@ int main()
 		//draw
 		window.draw(PheroTiles);
 		Colony1.drawColony(&window);
-		window.draw(pheromones);
+		//window.draw(pheromones);
 
 		for (auto &n : pblock_system)
 			window.draw(n);

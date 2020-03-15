@@ -6,6 +6,8 @@
 #include "VectorFunction.h"
 #include "PathBlocker.h"
 #include "Animation.h"
+#include "PheroMatrix.h"
+#include "constant.h"	
 
 #include<random>
 #include<math.h>
@@ -30,11 +32,13 @@ public:
 	float m_internal_clock{0.0f}; // for various counting
 
 	//sensory inputs 
-	float m_r1{20.0f}; //distance of sensory circles from ant origin
-	int m_scircle_count{ 32 }; //sensory circle counts
-	float m_active_num{ 5 };//number of neighbour circles from either side of face_indx
+	//float m_r1{20.0f}; //distance of sensory circles from ant origin
+	//int m_scircle_count{ 32 }; //sensory circle counts
+	//float m_active_num{ 5 };//number of neighbour circles from either side of face_indx
 
-	SensoryInput m_sensory_input{m_r1,m_scircle_count, this->getPosition(), m_active_num}; //create sensory circles
+	sf::CircleShape SensoryTracker; //for debug
+
+	//SensoryInput m_sensory_input{m_r1,m_scircle_count, this->getPosition(), m_active_num}; //create sensory circles
 
 
 	sf::Vector2f m_targetCoord;  //absolute coordinate vector in map
@@ -53,6 +57,7 @@ public:
 	void initAnt(float size, sf::Vector2f init_pos, sf::Texture *texture, std::vector<PathBlocker>* arg_pblock_system);
 	void updateMovement(float dt, std::vector<PathBlocker>* path_blck_ptr);
 	void secretPheromon(float dt, PheromoneSystem *psystem); //secret pheromone on spot
+	void secretPheromon2(float dt, PheroMatrix* phermatrix); //secret pheromone on spot (matrix version)
 	void sensePheromone(); //sense pheromones around the ant
 	void drawSensoryCircle(sf::RenderWindow* window);
 
@@ -70,7 +75,16 @@ public:
 
 	//======FORAGING=======//
 	int computeMoveTarget(); //compute
+	sf::Vector2f computeMovementMatrix(float dt, PheroMatrix* pheromat); //compute
+
 private:
+
+	//sensors
+	std::vector<float> m_Ci; //strength of sensor
+	unsigned int m_sensorNumPerSide{ 3 }; //sensors per side
+	float m_sensorSpacing{ 5 }; // space between sensor
+	std::vector<sf::Vector2f> m_sensorPosition; // sensor positions
+
 	State m_state{}; //reflects the states of ants
 	Activity m_activity{}; //ant can only engage in one activity at one time
 	Animation ant_animation;

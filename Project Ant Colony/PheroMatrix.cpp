@@ -6,6 +6,11 @@ PheroMatrix::~PheroMatrix() {}
 
 void PheroMatrix::initPheroMatrix(int world_width, int world_height, sf::Vector2u resolution_param)
 {
+
+	// throw an error if world dimension is not divisible by resolution
+	if (static_cast<bool>(world_height % resolution_param.y + world_width % resolution_param.x))
+		std::cout << "ERROR: Pheromone Matrix- World dimension must be perfectly divisible by resolution\n";
+
 	//Initializatoin
 	m_resolution.x = resolution_param.x;
 	m_resolution.y = resolution_param.y;
@@ -91,13 +96,33 @@ sf::Vector2u PheroMatrix::mapCoordsToPos(sf::Vector2f worldPos)
 	sf::Vector2u tilePos;
 	float x_tmp = worldPos.x;
 	float y_tmp = worldPos.y;
+
 	if (x_tmp < 0) x_tmp = 0.0;
 	if (y_tmp < 0) y_tmp = 0.0;
 
 	tilePos.x = static_cast<unsigned int>(x_tmp / m_tile_width);
 	tilePos.y = static_cast<unsigned int>(y_tmp / m_tile_height);
 
-	printf("worldPos[%f %f] -> tilePos[%d %d]\n", worldPos.x, worldPos.y, tilePos.x, tilePos.y);
+	// subscript out of bound management
+
+	if ((tilePos.x) >= m_resolution.x)
+	{
+		tilePos.x = (m_resolution.x -1);
+		//std::cout << "outbound correctin\n";
+	}
+	if ((tilePos.y) >= m_resolution.y)
+	{
+		tilePos.y = (m_resolution.y -1);
+		//std::cout << "outbound correctin\n";
+	}
+
+	//printf("worldPos[%f %f] -> tilePos[%d %d]\n", worldPos.x, worldPos.y, tilePos.x, tilePos.y);
 
 	return tilePos;
+}
+
+float PheroMatrix::getStrengh(sf::Vector2f worldPos)
+{
+	sf::Vector2u tilePos= mapCoordsToPos(worldPos);
+	return m_strengthmatrix[tilePos.x + tilePos.y * m_resolution.x];
 }

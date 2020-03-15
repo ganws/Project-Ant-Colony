@@ -16,12 +16,13 @@ void Colony::addAnt(sf::Vector2f spawn_loc)
 	ant_num++;
 }
 
-void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture *ant_skin_main, PheromoneSystem* phr_ptr)
+void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture *ant_skin_main, PheromoneSystem* phr_ptr, PheroMatrix* phero_mat_input)
 {
 	this->AntContainer.reserve(sizeof(Ant)*1000);
 	this->pblocker_systm_ptr = ptr_copy;
 	this->ant_skin = ant_skin_main;
 	this->pheromones_ptr = phr_ptr;
+	this->m_pheromatrix_ptr = phero_mat_input;
 	std::cout << "Colony Initialized with pblock add:" << pblocker_systm_ptr << "\n";
 	std::cout << "size of Ant = " << sizeof(Ant) << "\n";
 }
@@ -54,10 +55,20 @@ void Colony::computeAntMove(float dt)
 		for (auto &n : AntContainer)
 		{
 			n.updateMovement(dt, pblocker_systm_ptr);
-			n.secretPheromon(dt, pheromones_ptr);
-			n.m_sensory_input.detectPheromone(pheromones_ptr);
-			//std::cout << n.pblocker_systm_ptr << "\n";
-			//std::cout << AntContainer.size(); "\n";
+			//n.secretPheromon(dt, pheromones_ptr);
+			n.secretPheromon2(dt, m_pheromatrix_ptr);
+			sf::Vector2f tmp =  n.computeMovementMatrix(dt, m_pheromatrix_ptr);
+			n.issue_move_command(tmp);
+
+			//for (auto &p : *pblocker_systm_ptr)
+			//{
+			//	if (p.getGlobalBounds().intersects(n.getGlobalBounds()))
+			//	{
+			//		sf::Vector2f faceVector = n.getPosition()-p.getPosition();
+			//		n.issue_move_command(sf::Vector2f(500,500));
+			//	}
+			//}
+
 		}
 	}
 }
