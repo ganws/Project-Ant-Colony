@@ -35,6 +35,7 @@
     <ClCompile Include="PheromoneSystem.cpp" />
     <ClCompile Include="SensoryCircle.cpp" />
     <ClCompile Include="SensoryInput.cpp" />
+    <ClCompile Include="SpatialPartition.cpp" />
     <ClCompile Include="VectorFunction.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
@@ -54,6 +55,7 @@
     <ClInclude Include="PheromoneSystem.h" />
     <ClInclude Include="SensoryCircle.h" />
     <ClInclude Include="SensoryInput.h" />
+    <ClInclude Include="SpatialPartition.h" />
     <ClInclude Include="VectorFunction.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>

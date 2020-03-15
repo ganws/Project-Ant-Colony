@@ -10,6 +10,7 @@
 #include "Colony.h"
 #include "Hashit.h"
 #include "PheroMatrix.h"
+#include "SpatialPartition.h"
 
 #include<fstream>
 #include<SFML/Graphics.hpp>
@@ -45,7 +46,7 @@ int main()
 	}
 
 	//======CREATE PHEROMONE SYSTEM=====
-	PheromoneSystem pheromones(10000); //fixed 10k particles. beyond that game will crash
+	//PheromoneSystem pheromones(10000); //fixed 10k particles. beyond that game will crash
 	PheroMatrix PheroTiles;
 
 	//======CREATE PHEROMONE SYSTEM 2=====
@@ -64,25 +65,20 @@ int main()
 
 	drawMapBoundary(&pblock_system);
 
+	//========LOAD SPATIAL PARTITIONING OBJECT===========//
+	SpatialPartition partition;
+	partition.initSpatialPartition(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(12, 12));
+	partition.updateCheckIndex(&pblock_system);
+
 	//======CREATE COLONY==========//
 	Colony Colony1;
-	Colony1.initColony(&pblock_system, &skin, &pheromones, &PheroTiles);
+	Colony1.initColony(&pblock_system, &skin, &PheroTiles, &partition);
 
 	////=====WINDOW=======//
 	while (window.isOpen())
 	{
-		float randT = static_cast<float>(rand() / static_cast<float>(RAND_MAX) * 3);
-		if (randTime > randT)
-		{
-			float randLoc = static_cast<float>(rand() / static_cast<float>(RAND_MAX)* GameSetting::windowHeight);
-			float randLoc2 = static_cast<float>(rand() / static_cast<float>(RAND_MAX)* GameSetting::windowHeight);
-			randTime = 0.0f;
-		}
-
-	
 
 		sf::Event event;
-
 		while (window.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
@@ -101,7 +97,18 @@ int main()
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 				view.reset(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-				Colony1.addAnt(sf::Vector2f(GameSetting::windowWidth / 2, GameSetting::windowHeight / 2));
+			{
+				float rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowWidth));
+				float rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowHeight));
+
+				//recalculate for padding
+				while ((rand_x < 20.0 )| (rand_x > (GameSetting::windowWidth-20.0)))
+					rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowWidth));
+				while ((rand_y < 20.0) | (rand_y > (GameSetting::windowHeight - 20.0)))
+					rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowHeight));
+
+				Colony1.addAnt(sf::Vector2f(rand_x, rand_y));
+			}
 				
 
 			// issue move command
@@ -158,7 +165,7 @@ int main()
 						std::cout << command_list;
 						break;
 
-					case TEXT_COMMAND::ANTNUM:
+					case TEXT_COMMAND::ANTSIZE:
 						std::cout << Colony1.getAntNum() << "\n";
 						break;
 
@@ -176,16 +183,29 @@ int main()
 			}
 		}
 
-		// update frame	
+		/////////////////////////////////////////
+		//update frame	
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
 		Colony1.computeAntMove(timeElapsed);
 		PheroTiles.pheromoneDecay(timeElapsed);
-		pheromones.decay(timeElapsed);
+		//pheromones.decay(timeElapsed);
 
+		//spatial partitioning update
+		partition.clearPartition(); //clear all partition of ant pointers
+
+		for (int i = 0; i < Colony1.getAntNum(); i++)
+		{
+			Colony1.AntContainer[i].collision_check = false;
+			partition.updatePartition(&Colony1.AntContainer[i], Colony1.AntContainer[i].getPosition()); //add ant pointer to partition
+		}
+		partition.updateAntStatus(); //update ant collision check bool status
+
+		/////////////////////////////////////////
 		//clear window 
 		window.setView(view);
 		window.clear(sf::Color::White);
 
+		/////////////////////////////////////////
 		//draw
 		window.draw(PheroTiles);
 		Colony1.drawColony(&window);
@@ -197,7 +217,6 @@ int main()
 		
 		sf::View currentView = window.getView();
 		randTime += timeElapsed;
-
 
 	}
 

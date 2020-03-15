@@ -10,8 +10,8 @@ TEXT_COMMAND Parse(std::string const& StringIn)
 		command =  TEXT_COMMAND::EXIT;
 	if (StringIn == "-h")
 		command = TEXT_COMMAND::HELP;
-	if (StringIn == "-antnum")
-		command = TEXT_COMMAND::ANTNUM;
+	if (StringIn == "-antsize")
+		command = TEXT_COMMAND::ANTSIZE;
 	if (StringIn == "-skin")
 		command = TEXT_COMMAND::ANTSKIN;
 

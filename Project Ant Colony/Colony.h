@@ -2,6 +2,7 @@
 #include "Ant.h"
 #include "PathBlocker.h"
 #include "PheroMatrix.h"
+#include "SpatialPartition.h"
 
 class Colony
 {
@@ -17,7 +18,7 @@ public:
 	void addAnt(sf::Vector2f spwn_loc);
 	void removeAnt();
 	void computeAntMove(float dt);
-	void initColony(std::vector<PathBlocker>* pb_ptr, sf::Texture *ant_skin_mian, PheromoneSystem* pher_ptr_input, PheroMatrix* pheromat_input);
+	void initColony(std::vector<PathBlocker>* pb_ptr, sf::Texture *ant_skin_mian, PheroMatrix* pheromat_input, SpatialPartition *partition_input);
 	void updateAntNum();
 	void drawColony(sf::RenderWindow* window);
 	int getAntNum();
@@ -27,5 +28,5 @@ private:
 	std::vector<PathBlocker>* pblocker_systm_ptr{ nullptr };
 	PheromoneSystem* pheromones_ptr { nullptr };
 	PheroMatrix* m_pheromatrix_ptr{nullptr};
-
+	SpatialPartition* m_partition_ptr{ nullptr };
 };

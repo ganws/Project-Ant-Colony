@@ -6,7 +6,7 @@ enum class TEXT_COMMAND
 	CREATE_ANT = 1,
 	ERROR = 2,
 	HELP = 3,
-	ANTNUM = 4,
+	ANTSIZE = 4,
 	ANTSKIN = 5
 };
 

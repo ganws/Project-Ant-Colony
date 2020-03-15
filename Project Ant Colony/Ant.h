@@ -31,6 +31,8 @@ public:
 	float m_pheromon_period{0.05f}; //pheromon secreting  period [s]
 	float m_internal_clock{0.0f}; // for various counting
 
+	bool collision_check{false}; //true:check collision
+
 	//sensory inputs 
 	//float m_r1{20.0f}; //distance of sensory circles from ant origin
 	//int m_scircle_count{ 32 }; //sensory circle counts

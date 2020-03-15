@@ -266,11 +266,15 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 	{
 		m_Ci[i] = 1.0;
 		m_Ci[i] += pheroMat->getStrengh(m_sensorPosition[i]);
-		for (auto& pb : *pblocker_systm_ptr)
+
+		/*if (collision_check)
 		{
-			if (pb.getGlobalBounds().contains(m_sensorPosition[i]))
-				m_Ci[i] = 0;
-		}
+			for (auto& pb : *pblocker_systm_ptr)
+			{
+				if (pb.getGlobalBounds().contains(m_sensorPosition[i]))
+					m_Ci[i] = 0;
+			}
+		}*/
 		sum_C += m_Ci[i];
 	}
 
