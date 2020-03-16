@@ -15,7 +15,7 @@ void drawMapBoundary(std::vector<PathBlocker>* pblock_systm)
 	{
 	
 		sf::Vector2f placment_pos = sf::Vector2f(n * PB_length+ PB_length / 2, -PB_length / 2);
-		sf::Color PBColor = sf::Color::Red;
+		sf::Color PBColor = sf::Color::Blue;
 		(pb_top+n)->initPathBlocker(placment_pos, PBColor, PB_length);
 		pblock_systm->push_back(*(pb_top + n));
 	}
@@ -27,7 +27,7 @@ void drawMapBoundary(std::vector<PathBlocker>* pblock_systm)
 	{
 
 		sf::Vector2f placment_pos = sf::Vector2f(n * PB_length + PB_length / 2, GameSetting::windowHeight +  PB_length / 2);
-		sf::Color PBColor = sf::Color::Red;
+		sf::Color PBColor = sf::Color::Blue;
 		(pb_bot + n)->initPathBlocker(placment_pos, PBColor, PB_length);
 		pblock_systm->push_back(*(pb_bot + n));
 	}
@@ -39,7 +39,7 @@ void drawMapBoundary(std::vector<PathBlocker>* pblock_systm)
 	{
 
 		sf::Vector2f placment_pos = sf::Vector2f(-PB_length / 2, PB_length*n-PB_length/2);
-		sf::Color PBColor = sf::Color::Red;
+		sf::Color PBColor = sf::Color::Blue;
 		(pb_left + n)->initPathBlocker(placment_pos, PBColor, PB_length);
 		pblock_systm->push_back(*(pb_left + n));
 	}
@@ -51,7 +51,7 @@ void drawMapBoundary(std::vector<PathBlocker>* pblock_systm)
 	{
 
 		sf::Vector2f placment_pos = sf::Vector2f(GameSetting::windowWidth+PB_length / 2, PB_length * n - PB_length / 2);
-		sf::Color PBColor = sf::Color::Red;
+		sf::Color PBColor = sf::Color::Blue;
 		(pb_right + n)->initPathBlocker(placment_pos, PBColor, PB_length);
 		pblock_systm->push_back(*(pb_right + n));
 	}

@@ -25,6 +25,7 @@
     <ClCompile Include="Colony.cpp" />
     <ClCompile Include="constant.cpp" />
     <ClCompile Include="drawMapBoundary.cpp" />
+    <ClCompile Include="Food.cpp" />
     <ClCompile Include="GameSetting.cpp" />
     <ClCompile Include="Hashit.cpp" />
     <ClCompile Include="PathBlocker.cpp" />
@@ -46,6 +47,7 @@
     <ClInclude Include="Colony.h" />
     <ClInclude Include="constant.h" />
     <ClInclude Include="drawMapBoundary.h" />
+    <ClInclude Include="Food.h" />
     <ClInclude Include="GameSetting.h" />
     <ClInclude Include="Hashit.h" />
     <ClInclude Include="PathBlocker.h" />

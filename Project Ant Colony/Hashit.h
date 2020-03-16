@@ -10,4 +10,13 @@ enum class TEXT_COMMAND
 	ANTSKIN = 5
 };
 
+enum class MOUSE_INPUT_MODE
+{
+	EMPTY = 0,
+	ADDANT = 1,
+	PHEROMONE = 2,
+	PBLOCK = 3,
+	FOOD = 4
+};
+
 TEXT_COMMAND Parse(std::string const & StringIn);

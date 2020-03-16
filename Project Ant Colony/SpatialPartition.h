@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Ant.h"
+#include "Food.h"
 #include "PathBlocker.h"
 #include<iostream>
 #include<vector>
@@ -24,6 +25,7 @@ public:
 	void updatePartition(Ant *ant, sf::Vector2f ant_worldPos);
 	void clearPartition();
 	void updateCheckIndex(std::vector<PathBlocker> *pbsystem);
+	void addCheckIndex(Food& newfood);
 	void updateAntStatus();
 
 private:

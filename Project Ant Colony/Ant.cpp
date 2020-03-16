@@ -105,7 +105,16 @@ void Ant::secretPheromon2(float dt, PheroMatrix *pheroMat)
 	m_internal_clock = m_internal_clock + dt;
 	if (m_internal_clock >= m_pheromon_period) //secret pheromone at every fixed interval
 	{
-		pheroMat->addStrength(this->getPosition(), 50);
+		switch (m_activity)
+		{
+		case Activity::GATHERING:
+			pheroMat->addStrength(this->getPosition(), 50);
+			break;
+
+		default:
+			pheroMat->addStrength(this->getPosition(), 50);
+			break;
+		}
 		m_internal_clock = 0.0f; //restart clock
 	}
 }
@@ -133,7 +142,7 @@ void Ant::drawSensoryCircle(sf::RenderWindow* window)
 //Setter and Getters
 Activity Ant::getActivity()
 {
-	std::cout<< "Current activity: "<< printActivity(m_activity) <<"\n";//debug message
+	//std::cout<< "Current activity: "<< printActivity(m_activity) <<"\n";//debug message
 	return m_activity;
 }
 float Ant::getMoveSpeed()
@@ -145,7 +154,22 @@ void Ant::setMoveSpeed(float movespeed)
 	this->m_movespeed = movespeed;
 }
 
-void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vector<PathBlocker>* arg_pblock_system)
+void Ant::rememberFoodLoc(sf::Vector2f food_loc)
+{
+	m_food_pos_memory = food_loc;
+}
+
+sf::Vector2f Ant::recallFoodLoc()
+{
+	return m_food_pos_memory;
+}
+
+void Ant::forgetFoodLoc()
+{
+	m_food_pos_memory = {};
+}
+
+void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system)
 {
 	SensoryTracker.setFillColor(sf::Color::Transparent);
 	SensoryTracker.setRadius(5);
@@ -166,7 +190,10 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vec
 	m_size.x = getLocalBounds().height;
 	m_size.y = getLocalBounds().width;
 
+
+	//environment pointers
 	pblocker_systm_ptr = arg_pblock_system; //path block system
+	food_system_ptr = arg_food_system; //food system
 
 	//state init
 	//m_activity = Activity::IDLE; //init
@@ -178,47 +205,10 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vec
 	std::cout << "Ant initialized, pblock ptr=" << pblocker_systm_ptr << "\n";
 }
 
-//int Ant::computeMoveTarget()
-//{
-//	//probability of moving to circle i, P(i) = Ci / sum(C)
-//	double sum_C{0};
-//	
-//	std::vector<double> Ci_vector;
-//	for (int n = 0; n < m_scircle_count; n++)
-//	{
-//		Ci_vector.push_back(m_sensory_input.m_sensory_circle[n].Ci);
-//		sum_C += m_sensory_input.m_sensory_circle[n].Ci;
-//	}
-//
-//	//if no pheromone detected, make all circle equal chance
-//	if (sum_C <= constants::near_zero)
-//		for (int n = 0; n < m_scircle_count; n++)
-//			Ci_vector[n] = 1.0;
-//	Ci_vector[m_sensory_input.m_facing_index] = 3;
-//
-//	//create discrete distribution
-//	std::discrete_distribution<int> target_circle_PDistrib (Ci_vector.begin(), Ci_vector.end());
-//
-//	//displaying probabilities
-//	/*for (double x : target_circle_PDistrib.probabilities())
-//		std::cout << x << " ";
-//	std::cout << std::endl;*/
-//
-//	//decision making
-//	std::random_device rd;
-//	std::mt19937 gen(rd());
-//	int target_circle_index = target_circle_PDistrib(gen);
-//
-//	//visual update to sensory circle
-//	m_sensory_input.lightUpCircle(target_circle_index);
-//
-//	return target_circle_index;
-//	
-//}
-
 // matrix version
 sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 {
+	/////////////////////////////////
 	/////////////////////////////////
 	//=====define sensor area======//
 	sf::Vector2u currentTilePos = pheroMat->mapCoordsToPos(this->getPosition()); // compute ant current tile position
@@ -272,7 +262,25 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 			for (auto& pb : *pblocker_systm_ptr)
 			{
 				if (pb.getGlobalBounds().contains(m_sensorPosition[i]))
+				{
 					m_Ci[i] = 0;
+					//std::cout << "collide!\n";
+
+				}
+			}
+
+			//only check the one foraging
+			if (m_activity == Activity::FORAGING)
+			{
+				for (auto& fs : *food_system_ptr)
+					if (fs.getGlobalBounds().contains(m_sensorPosition[i]))
+					{
+						m_state.CARRYING = true;
+						m_activity = Activity::GATHERING;						
+						rememberFoodLoc(fs.getPosition());
+						std::cout << "Food found!!\n";
+						
+					}
 			}
 		}
 		sum_C += m_Ci[i];
@@ -286,7 +294,7 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 	//-------------DECISION MAKING-------------//
 
 	//create discrete distribution
-
+	m_Ci[0] *= 10;
 	std::discrete_distribution<> str_PDistrib(m_Ci.begin(), m_Ci.end());
 
 	std::random_device rd;

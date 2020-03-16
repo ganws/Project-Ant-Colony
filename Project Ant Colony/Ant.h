@@ -8,7 +8,7 @@
 #include "Animation.h"
 #include "PheroMatrix.h"
 #include "constant.h"	
-
+#include "Food.h"
 #include<random>
 #include<math.h>
 #include<SFML/Graphics.hpp>
@@ -32,6 +32,7 @@ public:
 	float m_internal_clock{0.0f}; // for various counting
 
 	bool collision_check{false}; //true:check collision
+	State m_state{}; //reflects the states of ants
 
 	//sensory inputs 
 	//float m_r1{20.0f}; //distance of sensory circles from ant origin
@@ -47,6 +48,7 @@ public:
 	float m_targetFaceAngle; //absolute angle [0, 360)
 
 	std::vector<PathBlocker>* pblocker_systm_ptr{nullptr};
+	std::vector<Food>* food_system_ptr{ nullptr };
 	
 public:
 
@@ -56,7 +58,7 @@ public:
 	Ant(const Ant& obj);
 	~Ant(); //destructor
 
-	void initAnt(float size, sf::Vector2f init_pos, sf::Texture *texture, std::vector<PathBlocker>* arg_pblock_system);
+	void initAnt(float size, sf::Vector2f init_pos, sf::Texture *texture, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system);
 	void updateMovement(float dt, std::vector<PathBlocker>* path_blck_ptr);
 	void secretPheromon(float dt, PheromoneSystem *psystem); //secret pheromone on spot
 	void secretPheromon2(float dt, PheroMatrix* phermatrix); //secret pheromone on spot (matrix version)
@@ -69,14 +71,17 @@ public:
 	Activity getActivity(); //return current activity
 	void switchActivity(Activity new_activity); //switch to new activity
 	State getState(); //return all current states
-	void switchState(State target_state, bool new_state); //turning a state on and off 
+	void switchState(State state_target, bool new_state); //turning a state on and off 
+	sf::Vector2f recallFoodLoc(); //recall food location
+	void rememberFoodLoc(sf::Vector2f food_loc); //remember food location
+	void forgetFoodLoc(); 
 
 	// Command function
 	void issue_move_command(sf::Vector2f coordinate); //issue move command. Issuing this command
 	void issue_face_command(float facingAngle); //rotate ants (in degree)
 
 	//======FORAGING=======//
-	int computeMoveTarget(); //compute
+	//int computeMoveTarget(); //compute
 	sf::Vector2f computeMovementMatrix(float dt, PheroMatrix* pheromat); //compute
 
 private:
@@ -86,8 +91,7 @@ private:
 	unsigned int m_sensorNumPerSide{ 3 }; //sensors per side
 	float m_sensorSpacing{ 5 }; // space between sensor
 	std::vector<sf::Vector2f> m_sensorPosition; // sensor positions
-
-	State m_state{}; //reflects the states of ants
+	sf::Vector2f m_food_pos_memory{}; //temporary food location in ant small memory
 	Activity m_activity{}; //ant can only engage in one activity at one time
 	Animation ant_animation;
 	

@@ -11,21 +11,24 @@
 #include "Hashit.h"
 #include "PheroMatrix.h"
 #include "SpatialPartition.h"
+#include "Food.h"
 
 #include<fstream>
 #include<SFML/Graphics.hpp>
 #include<SFML/Window.hpp>
 #include<SFML/OpenGL.hpp>
+#include<iostream>
 
 int main()
 {
+
+	//////////////////////////////////////////////////////////////////////////////
+	////////////////////////////   INITIALIZATION   //////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
 	sf::RenderWindow window(sf::VideoMode(GameSetting::windowWidth, GameSetting::windowHeight), "Colony");
 	window.setFramerateLimit(GameSetting::FRAMERATE);
 	sf::View view(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
 	sf::Clock gameclock;
-
-	std::cout << static_cast<bool>(1200%7 + 1200%300) << "\n";
-
 
 	float timeElapsed{ 0.0f };
 	float randTime{ 0.0f };
@@ -45,6 +48,16 @@ int main()
 			std::cout << command_list;
 	}
 
+	//===============temporary UI settings =================//
+	bool block_placement{ false };
+	MOUSE_INPUT_MODE placement_mode{ MOUSE_INPUT_MODE::EMPTY };
+	bool show_pheromone{ true };
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	////////////////////////////   WORLD CREATION   //////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////
+
 	//======CREATE PHEROMONE SYSTEM=====
 	//PheromoneSystem pheromones(10000); //fixed 10k particles. beyond that game will crash
 	PheroMatrix PheroTiles;
@@ -60,23 +73,39 @@ int main()
 
 	//======PATH BLOCKERS========//
 	std::vector<PathBlocker> pblock_system;
-	PathBlocker pblock1(sf::Vector2f(100.0f, 100.0f), sf::Color::Red, 30.0f);
+	PathBlocker pblock1(sf::Vector2f(100.0f, 100.0f), sf::Color::Blue, 30.0f);
 	pblock_system.push_back(pblock1);
 
 	drawMapBoundary(&pblock_system);
 
 	//========LOAD SPATIAL PARTITIONING OBJECT===========//
 	SpatialPartition partition;
-	partition.initSpatialPartition(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(12, 12));
+	partition.initSpatialPartition(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(20, 20));
 	partition.updateCheckIndex(&pblock_system);
+
+	//======FOOD OBJECT=============//
+	std::vector<Food> food_system;
 
 	//======CREATE COLONY==========//
 	Colony Colony1;
-	Colony1.initColony(&pblock_system, &skin, &PheroTiles, &partition);
+	Colony1.initColony(&pblock_system, &skin, &PheroTiles, &partition, &food_system);
+
+	//======COLONY HOLE===========//
+	sf::CircleShape Chole;
+	Chole.setFillColor(sf::Color::Magenta);
+	Chole.setRadius(10.0);
+	Chole.setOrigin(Chole.getRadius(), Chole.getRadius());
+	Chole.setPosition(sf::Vector2f(1000, 1000));
+	Colony1.setCholePos(Chole.getPosition());
+
 
 	////=====WINDOW=======//
 	while (window.isOpen())
 	{
+
+		//////////////////////////////////////////////////////////////////////////////
+		////////////////////////////   USER INTERFACE   //////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////
 
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -87,38 +116,103 @@ int main()
 			//move screen
 
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-				view.move(0.0f, 4.0f);
+				view.move(0.0f, 8.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-				view.move(0.0f, -4.0f);
+				view.move(0.0f, -8.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-				view.move(-4.0f, 0.0f);
+				view.move(-8.0f, 0.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-				view.move(4.0f, 0.0f);
+				view.move(8.0f, 0.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 				view.reset(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+
+			//======TOGGLE PHEROMONE VISUAL==============//
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Z))
+			{
+				show_pheromone = !show_pheromone;
+				std::cout << "PHEROMONE VISUAL: "<< show_pheromone <<"\n";
+			}
+
+			//===============ADD ANT================//
+			if ((event.type == sf::Event::KeyPressed)&&(event.key.code == sf::Keyboard::Q))
 			{
 				float rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowWidth));
 				float rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowHeight));
 
-				//recalculate for padding
+				////recalculate for padding
+				
 				while ((rand_x < 20.0 )| (rand_x > (GameSetting::windowWidth-20.0)))
 					rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowWidth));
 				while ((rand_y < 20.0) | (rand_y > (GameSetting::windowHeight - 20.0)))
 					rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowHeight));
 
 				Colony1.addAnt(sf::Vector2f(rand_x, rand_y));
+				std::cout << "pressed Q!\n";
+			}
+
+
+			//////////////////MOUSE PLACEMENT///////////////////
+			//===============PATH BLOCKER================//
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::P))
+			{
+				placement_mode = MOUSE_INPUT_MODE::PBLOCK;
+				std::cout << "PATHBLOCK PLACEMENT: ON\n";
+			}
+
+			//===============ANT======================//
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::A))
+			{
+				placement_mode = MOUSE_INPUT_MODE::ADDANT;
+				std::cout << "ANT PLACEMENT: ON\n";
+			}
+
+			//===============PHEROMONE================//
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::O))
+			{
+				placement_mode = MOUSE_INPUT_MODE::PHEROMONE;
+				std::cout << "PHEROMONE PLACEMENT: ON\n";
+			}
+
+			//===============FOOD================//
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::F))
+			{
+				placement_mode = MOUSE_INPUT_MODE::FOOD;
+				std::cout << "FOOD PLACEMENT: ON\n";
 			}
 				
 
-			// issue move command
+			//===============MOUSE OBJECT PLACEMENT================//
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
-				
 				sf::Vector2i ClickPos = sf::Mouse::getPosition(window);
 				sf::Vector2f worldPos = window.mapPixelToCoords(ClickPos);
-				//pheromones.createParticle(sf::Vector2f(worldPos.x, worldPos.y), Activity::GATHERING);
-				PheroTiles.addStrength(worldPos, 100.0f);
+
+				//ANT
+				switch (placement_mode)
+				{
+				case MOUSE_INPUT_MODE::EMPTY:
+					break;
+				case MOUSE_INPUT_MODE::ADDANT:
+					Colony1.addAnt(worldPos);
+					break;
+				case MOUSE_INPUT_MODE::PHEROMONE:
+					PheroTiles.addStrength(worldPos, 100.0f);
+					break;
+				case MOUSE_INPUT_MODE::PBLOCK:
+					pblock_system.push_back(PathBlocker(worldPos, sf::Color::Blue, 30.0f));
+					partition.updateCheckIndex(&pblock_system);
+					break;
+				case MOUSE_INPUT_MODE::FOOD:
+					food_system.push_back(Food(worldPos,sf::Color::Green, 10));
+					partition.addCheckIndex(food_system[food_system.size() - 1]);
+					break;
+				default:
+					break;
+				}
+				{
+				}
+
+
 			}
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 			{
@@ -127,7 +221,8 @@ int main()
 				sf::Vector2f worldPos = window.mapPixelToCoords(ClickPos);
 
 			}
-			// DETECT STRING COMMAND
+
+			//===============STRING COMMAND================//
 			if (event.type == sf::Event::TextEntered)	
 			{
 				if (event.text.unicode < 128 && event.text.unicode!=13 && event.text.unicode != 8)
@@ -158,7 +253,7 @@ int main()
 
 					case TEXT_COMMAND::CREATE_ANT:
 						std::cout << "COMMAND: Create ant";
-						Colony1.addAnt(sf::Vector2f(GameSetting::windowWidth / 2, GameSetting::windowHeight/ 2));
+						//Colony1.addAnt(sf::Vector2f(GameSetting::windowWidth / 2, GameSetting::windowHeight/ 2));
 						break;
 
 					case TEXT_COMMAND::HELP:
@@ -181,10 +276,15 @@ int main()
 
 				}
 			}
-		}
+		}	
 
-		/////////////////////////////////////////
-		//update frame	
+			//////////////////////////////////////////////////////////////////////////////
+			/////////////////////////	     END OF UI      //////////////////////////////
+			//////////////////////////////////////////////////////////////////////////////
+
+		
+
+		//==========update frame==============//	
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
 		Colony1.computeAntMove(timeElapsed);
 		PheroTiles.pheromoneDecay(timeElapsed);
@@ -200,26 +300,27 @@ int main()
 		}
 		partition.updateAntStatus(); //update ant collision check bool status
 
-		/////////////////////////////////////////
-		//clear window 
+
+		//=========clear window =================//
 		window.setView(view);
 		window.clear(sf::Color::White);
 
-		/////////////////////////////////////////
-		//draw
-		window.draw(PheroTiles);
-		Colony1.drawColony(&window);
-		//window.draw(pheromones);
 
+		//========= draw window =================//
+		if(show_pheromone) window.draw(PheroTiles);
+		Colony1.drawColony(&window);
+		window.draw(Chole);
 		for (auto &n : pblock_system)
 			window.draw(n);
+		for (auto& f : food_system)
+			window.draw(f);
+
 		window.display();
 		
 		sf::View currentView = window.getView();
 		randTime += timeElapsed;
 
 	}
-
 
 	return 0;
 }

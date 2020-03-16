@@ -91,9 +91,35 @@ void SpatialPartition::updateCheckIndex(std::vector<PathBlocker> *pbsystem)
 	//remove duplicated indeces
 	std::sort(checkIndex.begin(), checkIndex.end());
 	checkIndex.erase(std::unique(checkIndex.begin(), checkIndex.end()), checkIndex.end());
+	std::cout << "Check index size: " << checkIndex.size() << "\n";
+}
 
-	for (auto& n : checkIndex)
-		std::cout << n << "\n";
+void SpatialPartition::addCheckIndex(Food& newfood)
+{
+	float length = newfood.getRadius()*2;
+	sf::Vector2f center = newfood.getPosition();
+
+	//calculate all 4 corner positions
+	sf::Vector2f cornersPos[4]{};
+	cornersPos[0] = center + sf::Vector2f(-length / 2, -length / 2); //top left
+	cornersPos[1] = center + sf::Vector2f(length / 2, -length / 2); //top right
+	cornersPos[2] = center + sf::Vector2f(length / 2, length / 2); //bottom right
+	cornersPos[3] = center + sf::Vector2f(-length / 2, length / 2); //bottom left
+
+	//check all 4 corners 
+	for (auto& n : cornersPos)
+	{
+		sf::Vector2u partitionPos;
+		partitionPos = mapCoordsToPos(n);
+		checkIndex.push_back(partitionPos.x + partitionPos.y * m_resolution.x);
+	}
+
+	//remove duplicated indeces
+	std::sort(checkIndex.begin(), checkIndex.end());
+	checkIndex.erase(std::unique(checkIndex.begin(), checkIndex.end()), checkIndex.end());
+	std::cout << "Check index size: " <<checkIndex.size() << "\n";
+
+
 }
 
 void SpatialPartition::updateAntStatus()

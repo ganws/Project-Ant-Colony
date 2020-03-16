@@ -24,7 +24,7 @@ private:
 
 	int m_tile_width;
 	int m_tile_height;
-	float m_decay_rate{5.0};
+	float m_decay_rate{1.0};
 	float m_initial_strength{ 100.0f }; //initial strength of newly created particle
 	sf::Vector2u m_resolution; //num of tiles *
 	std::vector<float> m_strengthmatrix; //2d array
