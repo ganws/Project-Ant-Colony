@@ -5,8 +5,18 @@ Project to simulate ant colony with hormone system.
 =====ROUGH IDEAS=====
 
 Ant movement system:
-  - An ant's movement is defined by an probability equation which takes pheromone level as input parameter.
-  - pathing coefficient is 0 when the grid is occupied by a path blocker
+  - An ant's movement is defined by an probability equation which takes pheromone strength (p-strength) as input parameter as follows,
+  
+		P(i) = Ci / sum(Ci) ,
+	where Ci is the p-strength detected by 'sensor' i. 
+	*The equation is highly simplified by ommiting all coefficients.
+  - Each ant has multiple pheromone 'sensors' spread across the front area.
+  - pathing coefficient is 0 when the grid is occupied by a path blocker.
+  - Factors that affects the movement pattern (that I can think of right now)
+	- Base value of all sensors (the higher it is relative to p-strength, the less sensitive sensors are)
+	- Sensitivity factor of front sensor (tendency to follow pheromone) 
+	- Coefficient of side sensors (tendency to diviate)
+	- resolution of pheromone matrix grid
 
 Pheromone system:
   - ant leaves behind a trail of pheromone particles at fixed interval
