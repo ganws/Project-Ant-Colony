@@ -121,3 +121,11 @@ float PheroMatrix::getStrengh(sf::Vector2f worldPos)
 	sf::Vector2u tilePos= mapCoordsToPos(worldPos);
 	return m_strengthmatrix[tilePos.x + tilePos.y * m_resolution.x];
 }
+
+void PheroMatrix::resetPheromone()
+{
+	for (int i = 0; i < m_resolution.x; i++)
+		for (int j = 0; j < m_resolution.y; j++)
+			m_strengthmatrix[i + j * m_resolution.x] = 0;
+
+}

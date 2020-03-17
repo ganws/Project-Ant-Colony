@@ -288,13 +288,16 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 
 	//if no pheromone detected, make all circle equal chance
 	if (sum_C <= constants::near_zero)
+	{
+		//std::cout << "path blocked!\n";
 		return sf::Vector2f(500, 500);
+	}
 
 	/////////////////////////////////////////////
 	//-------------DECISION MAKING-------------//
 
 	//create discrete distribution
-	m_Ci[0] *= 10;
+	m_Ci[0] *= 2;
 	std::discrete_distribution<> str_PDistrib(m_Ci.begin(), m_Ci.end());
 
 	std::random_device rd;

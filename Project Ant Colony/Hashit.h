@@ -7,7 +7,8 @@ enum class TEXT_COMMAND
 	ERROR = 2,
 	HELP = 3,
 	ANTSIZE = 4,
-	ANTSKIN = 5
+	ANTSKIN = 5,
+	CLEARPHERO = 6
 };
 
 enum class MOUSE_INPUT_MODE

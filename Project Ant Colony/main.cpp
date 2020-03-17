@@ -267,7 +267,9 @@ int main()
 					case TEXT_COMMAND::ANTSKIN:
 						std::cout << Colony1.ant_skin << "\n";
 						break;
-
+					case TEXT_COMMAND::CLEARPHERO:
+						PheroTiles.resetPheromone();
+						break;
 					default:
 						std::cout << "COMMAND: Unknown";
 					}

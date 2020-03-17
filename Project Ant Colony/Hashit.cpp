@@ -14,6 +14,8 @@ TEXT_COMMAND Parse(std::string const& StringIn)
 		command = TEXT_COMMAND::ANTSIZE;
 	if (StringIn == "-skin")
 		command = TEXT_COMMAND::ANTSKIN;
+	if (StringIn == "-x")
+		command = TEXT_COMMAND::CLEARPHERO;
 
 	return command;
 }

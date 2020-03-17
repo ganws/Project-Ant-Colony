@@ -5,4 +5,5 @@ Available commands:
 	-antsize		Show the number of ant in the colony
 	-skin		Show the pointer address of skin texture
 	-exit		Exit
+	-clear -p	Clear pheromone	
 

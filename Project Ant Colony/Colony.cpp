@@ -84,7 +84,7 @@ void Colony::computeAntMove(float dt)
 				{
 					//if (n.m_state.CARRYING == false)
 					n.issue_move_command(n.recallFoodLoc());
-					std::cout << "go back to food!\n";
+					//std::cout << "go back to food!\n";
 				}
 
 				break;

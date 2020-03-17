@@ -14,6 +14,7 @@ public:
 	void addStrength(sf::Vector2f worldPos , float input_str);
 	float getStrengh(sf::Vector2f worldPos); 
 	sf::Vector2u mapCoordsToPos(sf::Vector2f worldPos);
+	void resetPheromone();
 
 private:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
