@@ -39,7 +39,7 @@ public:
 	//int m_scircle_count{ 32 }; //sensory circle counts
 	//float m_active_num{ 5 };//number of neighbour circles from either side of face_indx
 
-	sf::CircleShape SensoryTracker; //for debug
+	std::vector<sf::CircleShape> SensoryTracker; //for debug
 
 	//SensoryInput m_sensory_input{m_r1,m_scircle_count, this->getPosition(), m_active_num}; //create sensory circles
 
@@ -95,5 +95,4 @@ private:
 	Activity m_activity{}; //ant can only engage in one activity at one time
 	Animation ant_animation;
 	
-
 };

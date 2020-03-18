@@ -136,7 +136,12 @@ void Ant::drawSensoryCircle(sf::RenderWindow* window)
 		//std::cout << "draw circle" << "\n";
 	//	window->draw(m_sensory_input.m_sensory_circle[i]);
 	//}
-	window->draw(SensoryTracker);
+	for (int i = 0; i < (m_sensorNumPerSide * 2 + 1); i++)
+	{
+		window->draw(SensoryTracker[i]);
+		SensoryTracker[i].setFillColor(sf::Color::Red);
+
+	}
 }
 
 //Setter and Getters
@@ -171,12 +176,18 @@ void Ant::forgetFoodLoc()
 
 void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system)
 {
-	SensoryTracker.setFillColor(sf::Color::Transparent);
-	SensoryTracker.setRadius(5);
-	SensoryTracker.setOrigin(2.5, 2.5);
 
 	m_sensorPosition.resize(m_sensorNumPerSide * 2 + 1); //include the middle sensor
-	m_Ci.resize(m_sensorNumPerSide*2 +1);
+	m_Ci.resize(m_sensorNumPerSide*4 +1);
+	SensoryTracker.resize(m_sensorNumPerSide * 2 + 1);
+	for (auto& s : SensoryTracker)
+	{
+		s.setFillColor(sf::Color::Red);
+		s.setRadius(3);
+		s.setOrigin(s.getRadius(), s.getRadius());
+
+	}
+
 
 	//Texture and size
 	int skin_length = skin->getSize().x / 8; // length of single frame from animation
@@ -205,7 +216,6 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vec
 	std::cout << "Ant initialized, pblock ptr=" << pblocker_systm_ptr << "\n";
 }
 
-// matrix version
 sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 {
 	/////////////////////////////////
@@ -236,13 +246,17 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 	m_sensorPosition[0] = this->getPosition() + scalarProduct(currentFaceVector, 15); 
 
 	//right side
-	for (int i = 0; i < m_sensorNumPerSide; i++) 
-		m_sensorPosition[i+1] = m_sensorPosition[0] + scalarProduct(normalFaceVector, (i+1)*m_sensorSpacing);
+	for (int i = 0; i < m_sensorNumPerSide; i++)
+		m_sensorPosition[i+1] = m_sensorPosition[0] +scalarProduct(-currentFaceVector,0*(i*i+1))+ scalarProduct(normalFaceVector, (i+1)*m_sensorSpacing);
 	//left side
 	for (int i = 0; i < m_sensorNumPerSide; i++)
-		m_sensorPosition[m_sensorNumPerSide+1+i] = m_sensorPosition[0] + scalarProduct(-normalFaceVector, (i+1)*m_sensorSpacing);
+		m_sensorPosition[m_sensorNumPerSide+1+i] = m_sensorPosition[0] + scalarProduct(-currentFaceVector, 0 * (i*i + 1))+ scalarProduct(-normalFaceVector, (i+1)*m_sensorSpacing);
 
-	SensoryTracker.setPosition(m_sensorPosition[0]);
+	//m_sensorPosition[m_sensorNumPerSide] = m_sensorPosition[m_sensorNumPerSide] + scalarProduct(-currentFaceVector, 7) + scalarProduct(-normalFaceVector,5);
+	//m_sensorPosition[m_sensorNumPerSide * 2] = m_sensorPosition[m_sensorNumPerSide * 2] + scalarProduct(-currentFaceVector, 7) + scalarProduct(normalFaceVector, 5);
+
+	for (int i = 0; i < sensorTotalNum; i++)
+		SensoryTracker[i].setPosition(m_sensorPosition[i]);
 
 	/////////////////////////////////////////////////
 	//============COMPUTE PROBABILITY=============//
@@ -255,6 +269,8 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 	for (int i = 0;i < sensorTotalNum; i++)
 	{
 		m_Ci[i] = 5.0;
+		//if ((i == m_sensorNumPerSide) | (i == sensorTotalNum - 1))
+			//m_Ci[i] = 0.1;
 		m_Ci[i] += pheroMat->getStrengh(m_sensorPosition[i]);
 
 		if (collision_check)
@@ -283,6 +299,7 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 					}
 			}
 		}
+
 		sum_C += m_Ci[i];
 	}
 
@@ -291,18 +308,20 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 	{
 		//std::cout << "path blocked!\n";
 		return sf::Vector2f(500, 500);
+		//return scalarProduct(-currentFaceVector, 15);
 	}
 
 	/////////////////////////////////////////////
 	//-------------DECISION MAKING-------------//
 
 	//create discrete distribution
-	m_Ci[0] *= 2;
+	m_Ci[0] *= 5;
 	std::discrete_distribution<> str_PDistrib(m_Ci.begin(), m_Ci.end());
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	int moveToIndex = str_PDistrib(gen);
+	SensoryTracker[moveToIndex].setFillColor(sf::Color::Green);
 
 	return m_sensorPosition[moveToIndex];
 }

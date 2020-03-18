@@ -31,7 +31,7 @@ void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture *ant_ski
 	std::cout << "size of Ant = " << sizeof(Ant) << "\n";
 }
 
-void Colony::drawColony(sf::RenderWindow* window)
+void Colony::drawColony(sf::RenderWindow* window, bool display_sensor)
 {
 	if (AntContainer.size()!=0)
 	{
@@ -40,7 +40,8 @@ void Colony::drawColony(sf::RenderWindow* window)
 			//std::cout << k << "\n";
 			//std::cout << "antdraw! \n";
 			window->draw(n);
-			n.drawSensoryCircle(window);
+			if (display_sensor)
+				n.drawSensoryCircle(window);
 			//k++;
 		}
 	}

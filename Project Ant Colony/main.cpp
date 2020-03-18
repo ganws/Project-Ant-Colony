@@ -52,6 +52,7 @@ int main()
 	bool block_placement{ false };
 	MOUSE_INPUT_MODE placement_mode{ MOUSE_INPUT_MODE::EMPTY };
 	bool show_pheromone{ true };
+	bool show_sensor{ true };
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -131,6 +132,13 @@ int main()
 			{
 				show_pheromone = !show_pheromone;
 				std::cout << "PHEROMONE VISUAL: "<< show_pheromone <<"\n";
+			}
+
+			//======TOGGLE SENSOR VISUAL==============//
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::S))
+			{
+				show_sensor = !show_sensor;
+				std::cout << "SENSOR VISUAL: " << show_sensor << "\n";
 			}
 
 			//===============ADD ANT================//
@@ -310,7 +318,7 @@ int main()
 
 		//========= draw window =================//
 		if(show_pheromone) window.draw(PheroTiles);
-		Colony1.drawColony(&window);
+		Colony1.drawColony(&window, show_sensor);
 		window.draw(Chole);
 		for (auto &n : pblock_system)
 			window.draw(n);

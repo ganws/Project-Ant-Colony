@@ -20,7 +20,7 @@ public:
 	void computeAntMove(float dt);
 	void initColony(std::vector<PathBlocker>* pb_ptr, sf::Texture *ant_skin_mian, PheroMatrix* pheromat_input, SpatialPartition *partition_input, std::vector<Food>* food_system_input);
 	void updateAntNum();
-	void drawColony(sf::RenderWindow* window);
+	void drawColony(sf::RenderWindow* window, bool display_sensor);
 	int getAntNum();
 	sf::Vector2f getCholePos();
 	void setCholePos(sf::Vector2f chole_pos_input);
