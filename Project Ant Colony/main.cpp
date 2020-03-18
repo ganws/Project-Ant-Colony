@@ -45,7 +45,7 @@ int main()
 			command_list.push_back('\n');
 		}
 		command_list_file.close();
-			std::cout << command_list;
+		std::cout << command_list;
 	}
 
 	//===============temporary UI settings =================//
@@ -131,7 +131,7 @@ int main()
 			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Z))
 			{
 				show_pheromone = !show_pheromone;
-				std::cout << "PHEROMONE VISUAL: "<< show_pheromone <<"\n";
+				std::cout << "PHEROMONE VISUAL: " << show_pheromone << "\n";
 			}
 
 			//======TOGGLE SENSOR VISUAL==============//
@@ -142,14 +142,14 @@ int main()
 			}
 
 			//===============ADD ANT================//
-			if ((event.type == sf::Event::KeyPressed)&&(event.key.code == sf::Keyboard::Q))
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Q))
 			{
 				float rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowWidth));
 				float rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowHeight));
 
 				////recalculate for padding
-				
-				while ((rand_x < 20.0 )| (rand_x > (GameSetting::windowWidth-20.0)))
+
+				while ((rand_x < 20.0) | (rand_x > (GameSetting::windowWidth - 20.0)))
 					rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowWidth));
 				while ((rand_y < 20.0) | (rand_y > (GameSetting::windowHeight - 20.0)))
 					rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowHeight));
@@ -187,7 +187,7 @@ int main()
 				placement_mode = MOUSE_INPUT_MODE::FOOD;
 				std::cout << "FOOD PLACEMENT: ON\n";
 			}
-				
+
 
 			//===============MOUSE OBJECT PLACEMENT================//
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -211,7 +211,7 @@ int main()
 					partition.updateCheckIndex(&pblock_system);
 					break;
 				case MOUSE_INPUT_MODE::FOOD:
-					food_system.push_back(Food(worldPos,sf::Color::Green, 10));
+					food_system.push_back(Food(worldPos, sf::Color::Green, 10));
 					partition.addCheckIndex(food_system[food_system.size() - 1]);
 					break;
 				default:
@@ -231,17 +231,17 @@ int main()
 			}
 
 			//===============STRING COMMAND================//
-			if (event.type == sf::Event::TextEntered)	
+			if (event.type == sf::Event::TextEntered)
 			{
-				if (event.text.unicode < 128 && event.text.unicode!=13 && event.text.unicode != 8)
+				if (event.text.unicode < 128 && event.text.unicode != 13 && event.text.unicode != 8)
 				{
-					char tmpChar{static_cast<char>(event.text.unicode)};
+					char tmpChar{ static_cast<char>(event.text.unicode) };
 					USER_INPUT.push_back(tmpChar);
 					std::cout << tmpChar;
 				}
 			}
 
-			if ((!USER_INPUT.empty())&&(sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace)))
+			if ((!USER_INPUT.empty()) && (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace)))
 			{
 				USER_INPUT.pop_back();
 				std::cout << "\b \b";
@@ -250,7 +250,7 @@ int main()
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
 
 			{
-				if (!USER_INPUT.empty()) 
+				if (!USER_INPUT.empty())
 				{
 					std::cout << "\n";
 					switch (Parse(USER_INPUT))
@@ -286,15 +286,13 @@ int main()
 
 				}
 			}
-		}	
+		}
 
-			//////////////////////////////////////////////////////////////////////////////
-			/////////////////////////	     END OF UI      //////////////////////////////
-			//////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////
+		/////////////////////////	     END OF UI      //////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////
 
-		
-
-		//==========update frame==============//	
+	//==========update frame==============//	
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
 		Colony1.computeAntMove(timeElapsed);
 		PheroTiles.pheromoneDecay(timeElapsed);
@@ -315,18 +313,17 @@ int main()
 		window.setView(view);
 		window.clear(sf::Color::White);
 
-
 		//========= draw window =================//
-		if(show_pheromone) window.draw(PheroTiles);
+		if (show_pheromone) window.draw(PheroTiles);
 		Colony1.drawColony(&window, show_sensor);
 		window.draw(Chole);
-		for (auto &n : pblock_system)
+		for (auto& n : pblock_system)
 			window.draw(n);
 		for (auto& f : food_system)
 			window.draw(f);
 
 		window.display();
-		
+
 		sf::View currentView = window.getView();
 		randTime += timeElapsed;
 

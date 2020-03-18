@@ -44,8 +44,8 @@ public:
 	//SensoryInput m_sensory_input{m_r1,m_scircle_count, this->getPosition(), m_active_num}; //create sensory circles
 
 
-	sf::Vector2f m_targetCoord;  //absolute coordinate vector in map
-	float m_targetFaceAngle; //absolute angle [0, 360)
+	sf::Vector2f m_targetCoord{0.0,0.0};  //absolute coordinate vector in map
+	float m_targetFaceAngle{}; //absolute angle [0, 360)
 
 	std::vector<PathBlocker>* pblocker_systm_ptr{nullptr};
 	std::vector<Food>* food_system_ptr{ nullptr };

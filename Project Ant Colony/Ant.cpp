@@ -8,8 +8,7 @@ Ant::Ant() {};
 //{
 //	pblocker_systm_ptr = arg_pblock_system;
 //};
-Ant::Ant(const Ant& obj){}
-
+Ant::Ant(const Ant& obj) {};
 Ant::~Ant() {}; //destructor
 
 
@@ -122,7 +121,7 @@ void Ant::secretPheromon2(float dt, PheroMatrix *pheroMat)
 
 void Ant::switchActivity(Activity new_activity)
 {
-	std::cout << "Ant activity changed from " << printActivity(m_activity) << " to " << printActivity(new_activity) << "\n";
+	//std::cout << "Ant activity changed from " << printActivity(m_activity) << " to " << printActivity(new_activity) << "\n";
 	m_activity = new_activity;
 }
 void Ant::sensePheromone()
@@ -213,7 +212,7 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture *skin, std::vec
 
 	//Animation
 	ant_animation.InitAnimation(skin, sf::Vector2u(8, 8), 62, 0.01);
-	std::cout << "Ant initialized, pblock ptr=" << pblocker_systm_ptr << "\n";
+	//std::cout << "Ant initialized, pblock ptr=" << pblocker_systm_ptr << "\n";
 }
 
 sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)

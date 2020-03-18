@@ -42,3 +42,6 @@ Ant State and Activity
 Ant swarm system
 - each Ant is an object of Ant Class
 - Colony Class is a container class for a ants instances, with methods including 'addAnts','removeAnts' etc. 
+
+Colony map generation
+- Ridged multifractal noise generator (commonly used in procedural generation for dungeon and cave system)

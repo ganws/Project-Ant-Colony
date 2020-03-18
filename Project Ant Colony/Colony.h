@@ -12,7 +12,7 @@ public:
 	Colony();
 	~Colony();
 	sf::Texture* ant_skin;
-	std::vector<Ant> AntContainer;
+	std::vector<Ant> AntContainer{};
 
 	//method
 	void addAnt(sf::Vector2f spwn_loc);

@@ -14,13 +14,14 @@ void Colony::addAnt(sf::Vector2f spawn_loc)
 	this->AntContainer[(AntContainer.size()-1)].initAnt(0.1, spawn_loc, ant_skin, pblocker_systm_ptr, food_systm_ptr);
 	float init_faceangle{ static_cast<float>(rand() / (RAND_MAX / 360)) };
 	this->AntContainer[AntContainer.size()-1].setRotation(init_faceangle);
-	printf("Ant created! face angle = %f\n", init_faceangle);
+	//printf("Ant created! face angle = %f\n", init_faceangle);
 	ant_num++;
+	std::cout << "Ant added! Size = " << ant_num << std::endl;
 }
 
 void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture *ant_skin_main, PheroMatrix* phero_mat_input, SpatialPartition* partition_input, std::vector<Food>* food_system_input)
 {
-	this->AntContainer.reserve(sizeof(Ant)*1000);
+	this->AntContainer.reserve(1000);
 	this->pblocker_systm_ptr = ptr_copy;
 	this->food_systm_ptr = food_system_input;
 	this->ant_skin = ant_skin_main;
@@ -28,7 +29,7 @@ void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture *ant_ski
 	//this->pheromones_ptr = phr_ptr;
 	this->m_pheromatrix_ptr = phero_mat_input;
 	std::cout << "Colony Initialized with pblock add:" << pblocker_systm_ptr << "\n";
-	std::cout << "size of Ant = " << sizeof(Ant) << "\n";
+	std::cout << "size of Ant = " << AntContainer.size() << "\n";
 }
 
 void Colony::drawColony(sf::RenderWindow* window, bool display_sensor)

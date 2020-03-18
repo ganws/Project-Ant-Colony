@@ -91,7 +91,7 @@ void SpatialPartition::updateCheckIndex(std::vector<PathBlocker> *pbsystem)
 	//remove duplicated indeces
 	std::sort(checkIndex.begin(), checkIndex.end());
 	checkIndex.erase(std::unique(checkIndex.begin(), checkIndex.end()), checkIndex.end());
-	std::cout << "Check index size: " << checkIndex.size() << "\n";
+	//std::cout << "Check index size: " << checkIndex.size() << "\n";
 }
 
 void SpatialPartition::addCheckIndex(Food& newfood)
