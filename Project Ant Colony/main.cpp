@@ -18,6 +18,7 @@
 #include<SFML/Window.hpp>
 #include<SFML/OpenGL.hpp>
 #include<iostream>
+#include<SFML/System/Vector2.hpp>
 
 int main()
 {
@@ -29,6 +30,12 @@ int main()
 	window.setFramerateLimit(GameSetting::FRAMERATE);
 	sf::View view(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
 	sf::Clock gameclock;
+
+	sf::Vector2f v1(2, 2);
+	sf::Vector2f v2;
+	v2 =  v1*3.0;
+
+	printf("x = %f, y = %f\n", v2.x, v2.y);
 
 	float timeElapsed{ 0.0f };
 	float randTime{ 0.0f };
