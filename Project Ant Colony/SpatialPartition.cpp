@@ -13,7 +13,7 @@ void SpatialPartition::initSpatialPartition(int world_width, int world_height, s
 	//dimension of a partition unit
 	m_partition_height = world_height / m_resolution.y;
 	m_partition_width = world_width / m_resolution.x;
-	
+
 	m_Partition.resize(m_resolution.x * m_resolution.y);
 
 	checkIndex.resize(m_resolution.x * m_resolution.y);
@@ -48,7 +48,7 @@ sf::Vector2u SpatialPartition::mapCoordsToPos(sf::Vector2f worldPos)
 	return tilePos;
 }
 
-void SpatialPartition::updatePartition(Ant *ant, sf::Vector2f ant_worldPos)
+void SpatialPartition::updatePartition(Ant* ant, sf::Vector2f ant_worldPos)
 {
 	//add ant pointer to appropriate partition
 	sf::Vector2u pos = mapCoordsToPos(ant_worldPos);
@@ -57,15 +57,15 @@ void SpatialPartition::updatePartition(Ant *ant, sf::Vector2f ant_worldPos)
 
 void SpatialPartition::clearPartition()
 {
-	for (int i=0;i < m_resolution.x ; i++)
+	for (int i = 0; i < m_resolution.x; i++)
 		for (int j = 0; j < m_resolution.y; j++)
 		{
 			m_Partition[i + j * m_resolution.x].ant_ptr.clear();
-		}	
+		}
 }
 
 
-void SpatialPartition::updateCheckIndex(std::vector<PathBlocker> *pbsystem)
+void SpatialPartition::updateCheckIndex(std::vector<PathBlocker>* pbsystem)
 {
 	for (auto& n : *pbsystem)
 	{
@@ -84,7 +84,7 @@ void SpatialPartition::updateCheckIndex(std::vector<PathBlocker> *pbsystem)
 		{
 			sf::Vector2u partitionPos;
 			partitionPos = mapCoordsToPos(n);
-			checkIndex.push_back(partitionPos.x + partitionPos.y* m_resolution.x); 
+			checkIndex.push_back(partitionPos.x + partitionPos.y * m_resolution.x);
 		}
 	}
 
@@ -96,7 +96,7 @@ void SpatialPartition::updateCheckIndex(std::vector<PathBlocker> *pbsystem)
 
 void SpatialPartition::addCheckIndex(Food& newfood)
 {
-	float length = newfood.getRadius()*2;
+	float length = newfood.getRadius() * 2;
 	sf::Vector2f center = newfood.getPosition();
 
 	//calculate all 4 corner positions
@@ -117,7 +117,7 @@ void SpatialPartition::addCheckIndex(Food& newfood)
 	//remove duplicated indeces
 	std::sort(checkIndex.begin(), checkIndex.end());
 	checkIndex.erase(std::unique(checkIndex.begin(), checkIndex.end()), checkIndex.end());
-	std::cout << "Check index size: " <<checkIndex.size() << "\n";
+	std::cout << "Check index size: " << checkIndex.size() << "\n";
 
 
 }

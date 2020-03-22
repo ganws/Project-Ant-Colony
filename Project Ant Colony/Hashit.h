@@ -17,7 +17,9 @@ enum class MOUSE_INPUT_MODE
 	ADDANT = 1,
 	PHEROMONE = 2,
 	PBLOCK = 3,
-	FOOD = 4
+	FOOD = 4,
+	S_NODE = 5,
+	E_NODE = 6
 };
 
 TEXT_COMMAND Parse(std::string const & StringIn);

@@ -10,3 +10,8 @@ Food::Food(sf::Vector2f spwn_loc, sf::Color color, float radius)
 }
 
 Food::~Food() {}
+
+void Food::storePath(std::list<sf::Vector2f> short_path)
+{
+	m_Bestpath =  short_path;
+}

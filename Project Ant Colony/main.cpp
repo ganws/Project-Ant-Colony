@@ -12,6 +12,7 @@
 #include "PheroMatrix.h"
 #include "SpatialPartition.h"
 #include "Food.h"
+#include "Astar.h"
 
 #include<fstream>
 #include<SFML/Graphics.hpp>
@@ -19,6 +20,7 @@
 #include<SFML/OpenGL.hpp>
 #include<iostream>
 #include<SFML/System/Vector2.hpp>
+
 
 int main()
 {
@@ -30,12 +32,6 @@ int main()
 	window.setFramerateLimit(GameSetting::FRAMERATE);
 	sf::View view(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
 	sf::Clock gameclock;
-
-	sf::Vector2f v1(2, 2);
-	sf::Vector2f v2;
-	v2 =  v1*3.0;
-
-	printf("x = %f, y = %f\n", v2.x, v2.y);
 
 	float timeElapsed{ 0.0f };
 	float randTime{ 0.0f };
@@ -60,6 +56,8 @@ int main()
 	MOUSE_INPUT_MODE placement_mode{ MOUSE_INPUT_MODE::EMPTY };
 	bool show_pheromone{ true };
 	bool show_sensor{ true };
+	bool ALT_PRESSED{ false };
+	bool CTRL_PRESSED{ false };
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -91,9 +89,30 @@ int main()
 	partition.initSpatialPartition(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(20, 20));
 	partition.updateCheckIndex(&pblock_system);
 
+	//========LOAD A* SYSTEM===========//
+	
+	Astar AstarSystem;
+	sf::Vector2u res(40, 40);
+	AstarSystem.initAstar(GameSetting::windowWidth, GameSetting::windowHeight, res, true);
+	AstarSystem.updateObstacleNode(&pblock_system);
+	Node* startNode = &AstarSystem.m_Nodes[0];
+	Node* goalNode = &AstarSystem.m_Nodes[res.x * res.y - 1];
+	std::list <Node*> shortestPath;
+	shortestPath = AstarSystem.computePath(startNode, goalNode);
+
+	Astar TilePath_Rough;
+	sf::Vector2u res2(40, 40);
+	TilePath_Rough.initAstar(GameSetting::windowWidth, GameSetting::windowHeight, res2, true);
+	TilePath_Rough.updateObstacleNode(&pblock_system);
+	Node* start_node_rough = &TilePath_Rough.m_Nodes[0];
+	Node* goal_node_rough = &TilePath_Rough.m_Nodes[res2.x * res2.y - 1];
+	std::list <Node*> shortestPath_rough;	
+	shortestPath_rough = TilePath_Rough.computePath(start_node_rough, goal_node_rough);
+
 	//======FOOD OBJECT=============//
 	std::vector<Food> food_system;
-
+	std::list<sf::Vector2f> foodpath;
+	Food* newfood_ptr{nullptr};
 	//======CREATE COLONY==========//
 	Colony Colony1;
 	Colony1.initColony(&pblock_system, &skin, &PheroTiles, &partition, &food_system);
@@ -133,6 +152,32 @@ int main()
 				view.move(8.0f, 0.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 				view.reset(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
+
+			//======TOGGLE ALT==============//
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::LAlt))
+			{
+				ALT_PRESSED = true;
+				//std::cout << "ALT: " << ALT_PRESSED << "\n";
+			}
+
+			if ((event.type == sf::Event::KeyReleased) && (event.key.code == sf::Keyboard::LAlt))
+			{
+				ALT_PRESSED = false;
+				//std::cout << "ALT: " << ALT_PRESSED << "\n";
+			}
+
+			//======TOGGLE CTRL==============//
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::LControl))
+			{
+				CTRL_PRESSED = true;
+				//std::cout << "CTRL: " << CTRL_PRESSED << "\n";
+			}
+
+			if ((event.type == sf::Event::KeyReleased) && (event.key.code == sf::Keyboard::LControl))
+			{
+				CTRL_PRESSED = false;
+				//std::cout << "CTRL: " << CTRL_PRESSED << "\n";
+			}
 
 			//======TOGGLE PHEROMONE VISUAL==============//
 			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Z))
@@ -201,6 +246,10 @@ int main()
 			{
 				sf::Vector2i ClickPos = sf::Mouse::getPosition(window);
 				sf::Vector2f worldPos = window.mapPixelToCoords(ClickPos);
+				if (ALT_PRESSED)
+					placement_mode = MOUSE_INPUT_MODE::S_NODE;
+				if (CTRL_PRESSED)
+					placement_mode = MOUSE_INPUT_MODE::E_NODE;
 
 				//ANT
 				switch (placement_mode)
@@ -216,17 +265,41 @@ int main()
 				case MOUSE_INPUT_MODE::PBLOCK:
 					pblock_system.push_back(PathBlocker(worldPos, sf::Color::Blue, 30.0f));
 					partition.updateCheckIndex(&pblock_system);
+					AstarSystem.updateObstacleNode(&pblock_system);
+					TilePath_Rough.updateObstacleNode(&pblock_system);
+					shortestPath = AstarSystem.computePath(startNode, goalNode);
 					break;
 				case MOUSE_INPUT_MODE::FOOD:
 					food_system.push_back(Food(worldPos, sf::Color::Green, 10));
 					partition.addCheckIndex(food_system[food_system.size() - 1]);
+					
+					//compute path to colony hole
+					newfood_ptr = &food_system.back();
+					start_node_rough = TilePath_Rough.getNode(newfood_ptr->getPosition()); //node position of food
+					goal_node_rough = TilePath_Rough.getNode(Chole.getPosition()); //node position of colony
+					shortestPath_rough = TilePath_Rough.computePath(start_node_rough, goal_node_rough); //compute shortest path in Node position
+					foodpath = TilePath_Rough.getPathFromNode(shortestPath_rough);
+					newfood_ptr->storePath(foodpath);
+					
+					std::cout << "Food to colony path = \n";
+					for (auto path : foodpath)
+						printf("[%f][%f]\n", path.x, path.y);
+					break;
+				case MOUSE_INPUT_MODE::S_NODE:
+					startNode = AstarSystem.getNode(worldPos);
+					//printf("start = [%d][%d]\n", startNode->x, startNode->y);
+					shortestPath = AstarSystem.computePath(startNode, goalNode);
+					placement_mode = MOUSE_INPUT_MODE::EMPTY;
+					break;
+				case MOUSE_INPUT_MODE::E_NODE:
+					goalNode = AstarSystem.getNode(worldPos);
+					shortestPath = AstarSystem.computePath(startNode, goalNode);
+					//printf("goal = [%d][%d]\n", goalNode->x, goalNode->y);
+					placement_mode = MOUSE_INPUT_MODE::EMPTY;
 					break;
 				default:
 					break;
 				}
-				{
-				}
-
 
 			}
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
@@ -324,6 +397,8 @@ int main()
 		if (show_pheromone) window.draw(PheroTiles);
 		Colony1.drawColony(&window, show_sensor);
 		window.draw(Chole);
+		//window.draw(AstarSystem);
+		window.draw(TilePath_Rough);
 		for (auto& n : pblock_system)
 			window.draw(n);
 		for (auto& f : food_system)

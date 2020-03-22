@@ -94,5 +94,6 @@ private:
 	sf::Vector2f m_food_pos_memory{}; //temporary food location in ant small memory
 	Activity m_activity{}; //ant can only engage in one activity at one time
 	Animation ant_animation;
+	std::list <sf::Vector2f> m_MoveQueue;
 	
 };

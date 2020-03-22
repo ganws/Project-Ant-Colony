@@ -22,6 +22,8 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Ant.cpp" />
     <ClCompile Include="AntState.cpp" />
+    <ClCompile Include="Astar.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="Colony.cpp" />
     <ClCompile Include="constant.cpp" />
     <ClCompile Include="drawMapBoundary.cpp" />
@@ -37,7 +39,6 @@
     <ClCompile Include="SensoryCircle.cpp" />
     <ClCompile Include="SensoryInput.cpp" />
     <ClCompile Include="SpatialPartition.cpp" />
-    <ClCompile Include="test.cpp" />
     <ClCompile Include="VectorFunction.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
@@ -45,6 +46,8 @@
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Ant.h" />
     <ClInclude Include="AntState.h" />
+    <ClInclude Include="Astar.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="Colony.h" />
     <ClInclude Include="constant.h" />
     <ClInclude Include="drawMapBoundary.h" />
@@ -59,7 +62,6 @@
     <ClInclude Include="SensoryCircle.h" />
     <ClInclude Include="SensoryInput.h" />
     <ClInclude Include="SpatialPartition.h" />
-    <ClInclude Include="test.h" />
     <ClInclude Include="VectorFunction.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
