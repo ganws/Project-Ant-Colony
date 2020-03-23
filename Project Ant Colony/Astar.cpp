@@ -290,9 +290,9 @@ Node* Astar::getNode(sf::Vector2f worldPos)
 	return &m_Nodes[tmp.x + tmp.y * m_resolution.x];
 }
 
-std::list<sf::Vector2f> Astar::getPathFromNode(std::list<Node*> path)
+std::vector<sf::Vector2f> Astar::getPathFromNode(std::list<Node*> path)
 {
-	std::list<sf::Vector2f> path_wordcoord; //path in word coordninate
+	std::vector<sf::Vector2f> path_wordcoord; //path in word coordninate
 	for (auto n : path)
 	{
 		path_wordcoord.push_back(mapPosToCoord(n));

@@ -28,7 +28,7 @@ public:
 	
 	// find shortest path
 	std::list<Node*> computePath(Node* start_node, Node* goal_node);
-	std::list<sf::Vector2f> getPathFromNode(std::list<Node*> path);
+	std::vector<sf::Vector2f> getPathFromNode(std::list<Node*> path);
 
 
 private:

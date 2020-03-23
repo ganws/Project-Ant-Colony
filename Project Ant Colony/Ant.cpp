@@ -270,7 +270,7 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 		m_Ci[i] = 5.0;
 		//if ((i == m_sensorNumPerSide) | (i == sensorTotalNum - 1))
 			//m_Ci[i] = 0.1;
-		m_Ci[i] += pheroMat->getStrengh(m_sensorPosition[i]);
+		m_Ci[i] += pheroMat->getStrengh(m_sensorPosition[i])*5;
 
 		if (collision_check)
 		{
@@ -325,7 +325,126 @@ sf::Vector2f Ant::computeMovementMatrix(float dt, PheroMatrix* pheroMat)
 	return m_sensorPosition[moveToIndex];
 }
 
+sf::Vector2f Ant::computeMovement_colony(float dt, PheroMatrix* pheroMat, sf::Vector2f colony_hole_pos)
+{
+	/////////////////////////////////
+	/////////////////////////////////
+	//=====define sensor area======//
+	sf::Vector2u currentTilePos = pheroMat->mapCoordsToPos(this->getPosition()); // compute ant current tile position
+
+	float currentFaceAngle = this->getRotation();
+
+	//make angle system consistent 
+	currentFaceAngle -= 90;
+	if (currentFaceAngle < 0)
+		currentFaceAngle = 360 + currentFaceAngle;
+
+	// facing vector
+	sf::Vector2f currentFaceVector;
+	currentFaceVector.x = cos(currentFaceAngle * constants::pi / 180);
+	currentFaceVector.y = sin(currentFaceAngle * constants::pi / 180);
+	sf::Vector2f normalFaceVector(sf::Vector2f(-currentFaceVector.y, currentFaceVector.x));  	//normal vector
+	sf::Vector2f vec2Chole = colony_hole_pos - this->getPosition(); //vector from ant to colony hole
+
+	//sensors settings
+	unsigned const int sensorTotalNum = m_sensorNumPerSide * 2 + 1; //total sensor number
+
+	///////////////////////////////////
+	//====define sensor positions===//
+
+	//the middle sensor
+	m_sensorPosition[0] = this->getPosition() + scalarProduct(currentFaceVector, 15);
+
+	//right side
+	for (int i = 0; i < m_sensorNumPerSide; i++)
+		m_sensorPosition[i + 1] = m_sensorPosition[0] + scalarProduct(-currentFaceVector, 0 * (i * i + 1)) + scalarProduct(normalFaceVector, (i + 1) * m_sensorSpacing);
+	//left side
+	for (int i = 0; i < m_sensorNumPerSide; i++)
+		m_sensorPosition[m_sensorNumPerSide + 1 + i] = m_sensorPosition[0] + scalarProduct(-currentFaceVector, 0 * (i * i + 1)) + scalarProduct(-normalFaceVector, (i + 1) * m_sensorSpacing);
+
+	for (int i = 0; i < sensorTotalNum; i++)
+		SensoryTracker[i].setPosition(m_sensorPosition[i]);
+
+	/////////////////////////////////////////////////
+	//============COMPUTE PROBABILITY=============//
+	//probability of moving to circle i, P(i) = Ci / sum(C)
+	float sum_C{ 0.0 };
+	//	for (int i = 0; i < sensorTotalNum; i++)
+	//		m_Ci[i] = 1.0;
+
+		// populate all Ci
+	for (int i = 0; i < sensorTotalNum; i++)
+	{
+		m_Ci[i] = 1.0;
+		m_Ci[i] += pheroMat->getStrengh(m_sensorPosition[i]);
+		sf::Vector2f sensor_vec = m_sensorPosition[i] - this->getPosition();
+		float angle2Chole = vectorAngle(sensor_vec, vec2Chole);
+		angle2Chole = abs(angle2Chole / constants::pi * 180.0);
+		float distanceCoeef = dist2Vec(m_chole_pos, this->getPosition()); //the closer to colony hole, the more accurate it is
+
+		m_Ci[i] *= angle2Chole*distanceCoeef;
+
+		if (collision_check)
+		{
+			for (auto& pb : *pblocker_systm_ptr)
+			{
+				if (pb.getGlobalBounds().contains(m_sensorPosition[i]))
+				{
+					m_Ci[i] = 0;
+					//std::cout << "collide!\n";
+
+				}
+			}
+
+			//only check the one foraging
+			if (m_activity == Activity::FORAGING)
+			{
+				for (auto& fs : *food_system_ptr)
+					if (fs.getGlobalBounds().contains(m_sensorPosition[i]))
+					{
+						m_state.CARRYING = true;
+						m_activity = Activity::GATHERING;
+						rememberFoodLoc(fs.getPosition());
+						std::cout << "Food found!!\n";
+
+					}
+			}
+		}
+
+		sum_C += m_Ci[i];
+	}
+
+	////if all route are blocked, turn back
+	if (sum_C <= constants::near_zero)
+		return scalarProduct(-currentFaceVector, 15);
+
+	/////////////////////////////////////////////
+	//-------------DECISION MAKING-------------//
+
+	//create discrete distribution
+	//m_Ci[0] *= 5;
+	std::discrete_distribution<> str_PDistrib(m_Ci.begin(), m_Ci.end());
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	int moveToIndex = str_PDistrib(gen);
+	SensoryTracker[moveToIndex].setFillColor(sf::Color::Green);
+
+	return m_sensorPosition[moveToIndex];
+}
 
 
+sf::Vector2f Ant::recallCholePos()
+{
+	return m_chole_pos;
+}
+void Ant::rememberCholePos(sf::Vector2f chole_pos)
+{
+	m_chole_pos = chole_pos;
+}
 
-
+// update with state machine
+//void Ant::Update(float dt)
+//{
+//
+//}

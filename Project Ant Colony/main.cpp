@@ -111,7 +111,7 @@ int main()
 
 	//======FOOD OBJECT=============//
 	std::vector<Food> food_system;
-	std::list<sf::Vector2f> foodpath;
+	std::vector<sf::Vector2f> foodpath;
 	Food* newfood_ptr{nullptr};
 	//======CREATE COLONY==========//
 	Colony Colony1;
@@ -398,7 +398,7 @@ int main()
 		Colony1.drawColony(&window, show_sensor);
 		window.draw(Chole);
 		//window.draw(AstarSystem);
-		window.draw(TilePath_Rough);
+		//window.draw(TilePath_Rough);
 		for (auto& n : pblock_system)
 			window.draw(n);
 		for (auto& f : food_system)

@@ -9,6 +9,7 @@
 #include "PheroMatrix.h"
 #include "constant.h"	
 #include "Food.h"
+
 #include<random>
 #include<math.h>
 #include<SFML/Graphics.hpp>
@@ -72,9 +73,13 @@ public:
 	void switchActivity(Activity new_activity); //switch to new activity
 	State getState(); //return all current states
 	void switchState(State state_target, bool new_state); //turning a state on and off 
+
 	sf::Vector2f recallFoodLoc(); //recall food location
 	void rememberFoodLoc(sf::Vector2f food_loc); //remember food location
-	void forgetFoodLoc(); 
+	void forgetFoodLoc();
+
+	sf::Vector2f recallCholePos();
+	void rememberCholePos(sf::Vector2f chole_pos);
 
 	// Command function
 	void issue_move_command(sf::Vector2f coordinate); //issue move command. Issuing this command
@@ -82,16 +87,27 @@ public:
 
 	//======FORAGING=======//
 	//int computeMoveTarget(); //compute
-	sf::Vector2f computeMovementMatrix(float dt, PheroMatrix* pheromat); //compute
+	sf::Vector2f computeMovementMatrix(float dt, PheroMatrix* pheromat); //foraging movement
+	sf::Vector2f computeMovement_colony(float dt, PheroMatrix* pheromat, sf::Vector2f colony_hole_pos); //find way back to colony
 
 private:
 
+	// ant state
+	enum State
+	{
+		FORAGING,
+		GATHERING,
+		IDLE
+	};
+
 	//sensors
+	State m_currentState; //Ant current state
 	std::vector<unsigned int> m_Ci; //strength of sensor
 	unsigned int m_sensorNumPerSide{ 3 }; //sensors per side
 	float m_sensorSpacing{ 5 }; // space between sensor
 	std::vector<sf::Vector2f> m_sensorPosition; // sensor positions
 	sf::Vector2f m_food_pos_memory{}; //temporary food location in ant small memory
+	sf::Vector2f m_chole_pos{}; //Chole position memory
 	Activity m_activity{}; //ant can only engage in one activity at one time
 	Animation ant_animation;
 	std::list <sf::Vector2f> m_MoveQueue;
