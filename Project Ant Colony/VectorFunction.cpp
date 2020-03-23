@@ -26,3 +26,8 @@ sf::Vector2f scalarProduct(sf::Vector2f v, float scalar)
 {
 	return sf::Vector2f(v.x * scalar, v.y * scalar);
 }
+
+float dist2Vec(sf::Vector2f a, sf::Vector2f b)
+{
+	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
