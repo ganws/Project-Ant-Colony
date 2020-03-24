@@ -119,7 +119,7 @@ int main()
 
 	//======COLONY HOLE===========//
 	sf::CircleShape Chole;
-	Chole.setFillColor(sf::Color::Magenta);
+	Chole.setFillColor(sf::Color::Black);
 	Chole.setRadius(10.0);
 	Chole.setOrigin(Chole.getRadius(), Chole.getRadius());
 	Chole.setPosition(sf::Vector2f(1000, 1000));
@@ -256,12 +256,15 @@ int main()
 				{
 				case MOUSE_INPUT_MODE::EMPTY:
 					break;
+
 				case MOUSE_INPUT_MODE::ADDANT:
 					Colony1.addAnt(worldPos);
+
 					break;
 				case MOUSE_INPUT_MODE::PHEROMONE:
 					PheroTiles.addStrength(worldPos, 100.0f);
 					break;
+
 				case MOUSE_INPUT_MODE::PBLOCK:
 					pblock_system.push_back(PathBlocker(worldPos, sf::Color::Blue, 30.0f));
 					partition.updateCheckIndex(&pblock_system);
@@ -269,6 +272,7 @@ int main()
 					TilePath_Rough.updateObstacleNode(&pblock_system);
 					shortestPath = AstarSystem.computePath(startNode, goalNode);
 					break;
+
 				case MOUSE_INPUT_MODE::FOOD:
 					food_system.push_back(Food(worldPos, sf::Color::Green, 10));
 					partition.addCheckIndex(food_system[food_system.size() - 1]);
@@ -401,8 +405,14 @@ int main()
 		//window.draw(TilePath_Rough);
 		for (auto& n : pblock_system)
 			window.draw(n);
-		for (auto& f : food_system)
-			window.draw(f);
+		for (int i = 0; i < food_system.size(); i++)
+		{
+			window.draw(food_system[i]);
+			if (food_system[i].depleted)
+			{
+				food_system.erase(food_system.begin()+i);
+			}
+		}
 
 		window.display();
 

@@ -81,9 +81,12 @@ void PheroMatrix::pheromoneDecay(float dt)
 
 void PheroMatrix::addStrength(sf::Vector2f worldPos, float input_str)
 {
+	float maxStrength = 400;
 	sf::Vector2u tilePos = mapCoordsToPos(worldPos); //convert world coordinate to tile position
 	float& str = m_strengthmatrix[tilePos.x + tilePos.y * m_resolution.x];
 	str = str + input_str;
+	if (str >= maxStrength)
+		str = maxStrength;
 }
 
 sf::Vector2u PheroMatrix::mapCoordsToPos(sf::Vector2f worldPos)

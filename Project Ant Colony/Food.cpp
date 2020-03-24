@@ -6,7 +6,18 @@ Food::Food(sf::Vector2f spwn_loc, sf::Color color, float radius)
 	this->setRadius(radius);
 	this->setOrigin(radius, radius);
 	this->setPosition(spwn_loc);
-	m_amount = 10;
+	m_amount = 100;
+}
+
+int Food::Harvested(int harvest_amount)
+{
+	m_amount = m_amount - harvest_amount;
+	if (m_amount <= 0)
+	{
+		depleted = true;
+		return m_amount;
+	}
+	return harvest_amount;
 }
 
 Food::~Food() {}

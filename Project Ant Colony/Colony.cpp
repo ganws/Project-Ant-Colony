@@ -12,7 +12,7 @@ void Colony::addAnt(sf::Vector2f spawn_loc)
 	//dummyAnt.initAnt(0.1, spawn_loc, ant_skin);
 	this->AntContainer.push_back(Ant());
 	Ant& newant = AntContainer[AntContainer.size() - 1];
-	newant.initAnt(0.1, spawn_loc, ant_skin, pblocker_systm_ptr, food_systm_ptr);
+	newant.initAnt(0.1, spawn_loc, ant_skin, pblocker_systm_ptr, food_systm_ptr, m_pheromatrix_ptr);
 	float init_faceangle{ static_cast<float>(rand() / (RAND_MAX / 360)) };
 	newant.setRotation(init_faceangle);
 	newant.setRotation(init_faceangle);
@@ -43,7 +43,11 @@ void Colony::drawColony(sf::RenderWindow* window, bool display_sensor)
 		{
 			//std::cout << k << "\n";
 			//std::cout << "antdraw! \n";
-			window->draw(n);
+			if (n.m_visible)
+			{
+				window->draw(n);
+				window->draw(n.m_food_scrap);
+			}
 			if (display_sensor)
 				n.drawSensoryCircle(window);
 			//k++;
@@ -73,19 +77,21 @@ void Colony::computeAntMove(float dt)
 		//std::cout << AntContainer[0].pblocker_systm_ptr;
 		for (auto& n : AntContainer)
 		{
-			n.updateMovement(dt, pblocker_systm_ptr);
+			//n.updateMovement(dt);
 			//n.secretPheromon(dt, pheromones_ptr);
 			sf::Vector2f tmp{};
+
+			n.Update(dt);
 
 
 			//tmp = n.computeMovementMatrix(dt, m_pheromatrix_ptr);
 			//if (n.getActivity() == Activity::GATHERING)
 			//n.issue_move_command(tmp);
 
-			switch (n.getActivity())
+			/*switch (n.getActivity())
 			{
 			case Activity::FORAGING:
-				tmp = n.computeMovementMatrix(dt, m_pheromatrix_ptr);
+				tmp = n.computeMovementMatrix(dt);
 				break;
 
 			case Activity::GATHERING:
@@ -104,7 +110,7 @@ void Colony::computeAntMove(float dt)
 				break;
 			}
 
-			n.issue_move_command(tmp);
+			n.issue_move_command(tmp);*/
 		}
 
 		//check collision via spatial partitioning
