@@ -495,7 +495,7 @@ void Ant::Update(float dt)
 	case State::GO2FOOD:
 	{
 		this->updateMovement(dt);
-		float collectDist = 10.0f;
+		float collectDist = 20.0f;
 		float foodDist = dist2Vec(this->getPosition(), m_lock_position);
 		if (foodDist < collectDist)
 		{
@@ -534,8 +534,8 @@ void Ant::Update(float dt)
 
 	case State::GATHERING:
 	{
-		float enterHoleDist = 2.0;
-		float maxVisualDist = 100.0; //ant visual range
+		float enterHoleDist = 3.0;
+		float maxVisualDist = 80.0; //ant visual range
 		float choleDist = dist2Vec(this->getPosition(), m_chole_pos);
 
 		//check distance to hole
@@ -566,6 +566,7 @@ void Ant::Update(float dt)
 
 	case State::ENTERHOLE:
 	{
+		m_colony->addResourceAmount(gather_amount);
 		gather_amount = 0; //reset carry amount
 		m_visible = false; //hide ant
 		float holeTime{ 3.0 };

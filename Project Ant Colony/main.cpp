@@ -20,6 +20,7 @@
 #include<SFML/OpenGL.hpp>
 #include<iostream>
 #include<SFML/System/Vector2.hpp>
+#include<string>
 
 
 int main()
@@ -58,6 +59,24 @@ int main()
 	bool show_sensor{ true };
 	bool ALT_PRESSED{ false };
 	bool CTRL_PRESSED{ false };
+
+	//=============Game state display========================//
+	sf::Font fontArial;
+	fontArial.loadFromFile("../Resource/arial.ttf");
+
+	sf::Text stat_antnum;
+	stat_antnum.setString("Colony Size:");
+	stat_antnum.setFont(fontArial);
+	stat_antnum.setFillColor(sf::Color::Black);
+	stat_antnum.setCharacterSize(25);
+	stat_antnum.setPosition(GameSetting::windowWidth - 500, 10);
+
+	sf::Text stat_resource;
+	stat_resource.setString("Resource:");
+	stat_resource.setFont(fontArial);
+	stat_resource.setFillColor(sf::Color::Black);
+	stat_resource.setCharacterSize(25);
+	stat_resource.setPosition(GameSetting::windowWidth - 200, 10);
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -376,8 +395,15 @@ int main()
 		/////////////////////////	     END OF UI      //////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////
 
-	//==========update frame==============//	
+	//==========update frame==============//
+		
+
+		
+
+
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
+		if (timeElapsed > 1 / 20.0f)
+			timeElapsed = 1 / 20.0f;
 		Colony1.computeAntMove(timeElapsed);
 		PheroTiles.pheromoneDecay(timeElapsed);
 		//pheromones.decay(timeElapsed);
@@ -390,7 +416,15 @@ int main()
 			Colony1.AntContainer[i].collision_check = false;
 			partition.updatePartition(&Colony1.AntContainer[i], Colony1.AntContainer[i].getPosition()); //add ant pointer to partition
 		}
+
+		//game stat update
+
 		partition.updateAntStatus(); //update ant collision check bool status
+		std::string colonysize = "Colony size: " + std::to_string(Colony1.getAntNum());
+		stat_antnum.setString(colonysize);
+
+		std::string resourcesize = "Resource: " + std::to_string(Colony1.getResourceAmount());
+		stat_resource.setString(resourcesize);
 
 
 		//=========clear window =================//
@@ -398,6 +432,8 @@ int main()
 		window.clear(sf::Color::White);
 
 		//========= draw window =================//
+		window.draw(stat_antnum);
+		window.draw(stat_resource);
 		if (show_pheromone) window.draw(PheroTiles);
 		Colony1.drawColony(&window, show_sensor);
 		window.draw(Chole);

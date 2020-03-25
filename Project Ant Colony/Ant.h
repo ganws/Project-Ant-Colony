@@ -9,6 +9,7 @@
 #include "PheroMatrix.h"
 #include "constant.h"	
 #include "Food.h"
+#include "Colony.h"
 
 #include<random>
 #include<math.h>
@@ -17,7 +18,10 @@
 // Activity and State determine the basic behaviour of ants. An ant can have multiple states but only 1 activity at a time (no multitasking yet).
 // For simple analogy, brushing teeth is an activity while state of the person is "hand-moving" and "stationery".
 
-class Ant: public sf::Sprite
+class Colony;
+class Ant;
+
+class Ant : public sf::Sprite
 {
 public:
 
@@ -29,20 +33,20 @@ public:
 	float m_dmgtaken{}; // dmg taken per timestep
 	sf::Vector2f m_size; //ant size
 	float m_age{}; //age [days]
-	float m_pheromon_period{0.03f}; //pheromon secreting  period [s]
-	float m_internal_clock{0.0f}; // for various counting
+	float m_pheromon_period{ 0.03f }; //pheromon secreting  period [s]
+	float m_internal_clock{ 0.0f }; // for various counting
 
-	bool collision_check{false}; //true:check collision
+	bool collision_check{ false }; //true:check collision
 
 	std::vector<sf::CircleShape> SensoryTracker; //for debug
 
 	//SensoryInput m_sensory_input{m_r1,m_scircle_count, this->getPosition(), m_active_num}; //create sensory circles
 
 
-	sf::Vector2f m_targetCoord{0.0,0.0};  //absolute coordinate vector in map
+	sf::Vector2f m_targetCoord{ 0.0,0.0 };  //absolute coordinate vector in map
 	float m_targetFaceAngle{}; //absolute angle [0, 360)
 
-	
+
 public:
 
 	//constructor, destructor
@@ -53,9 +57,9 @@ public:
 
 	void Update(float dt);
 
-	void initAnt(float size, sf::Vector2f init_pos, sf::Texture *texture, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system, PheroMatrix* pheromat_sytm);
+	void initAnt(float size, sf::Vector2f init_pos, sf::Texture* texture, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system, PheroMatrix* pheromat_sytm);
 	void updateMovement(float dt);
-	void secretPheromon(float dt, PheromoneSystem *psystem); //secret pheromone on spot
+	void secretPheromon(float dt, PheromoneSystem* psystem); //secret pheromone on spot
 	void secretPheromon2(float dt, PheroMatrix* phermatrix, int str); //secret pheromone on spot (matrix version)
 	void sensePheromone(); //sense pheromones around the ant
 	void drawSensoryCircle(sf::RenderWindow* window);
@@ -87,7 +91,7 @@ public:
 private:
 
 	// boolean
-	bool m_visible{true};
+	bool m_visible{ true };
 
 	// ant state
 	enum class State
@@ -124,14 +128,14 @@ private:
 	sf::Vector2f m_food_pos{}; //temporary food location in ant small memory
 
 	//environment pointers
-	std::vector<PathBlocker>* pblocker_systm_ptr{nullptr};
+	std::vector<PathBlocker>* pblocker_systm_ptr{ nullptr };
 	std::vector<Food>* food_system_ptr{ nullptr };
 	PheroMatrix* pheromat_system_ptr{ nullptr };
 	Food* m_target_food{ nullptr };
 
-	
 	friend class Colony;
-
+	Colony* m_colony;
+	
 private:
 	sf::Vector2f getFaceVector();
 };

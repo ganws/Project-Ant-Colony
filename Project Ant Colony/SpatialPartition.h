@@ -6,7 +6,8 @@
 #include<iostream>
 #include<vector>
 
-
+class Colony;
+class Ant;
 struct PartitionUnit
 {
 	std::vector<Ant*> ant_ptr{200};

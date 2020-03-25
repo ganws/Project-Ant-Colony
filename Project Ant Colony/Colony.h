@@ -4,6 +4,10 @@
 #include "PheroMatrix.h"
 #include "SpatialPartition.h"
 
+class Colony;
+class Ant;
+class SpatialPartition;
+
 class Colony
 {
 public:
@@ -24,6 +28,8 @@ public:
 	int getAntNum();
 	sf::Vector2f getCholePos();
 	void setCholePos(sf::Vector2f chole_pos_input);
+	void addResourceAmount(int add_amount);
+	int getResourceAmount();
 
 private:
 	int ant_num{0};
@@ -33,4 +39,5 @@ private:
 	PheroMatrix* m_pheromatrix_ptr{nullptr};
 	SpatialPartition* m_partition_ptr{ nullptr };
 	sf::Vector2f m_chole_position{};
+	int m_totalResource;
 };

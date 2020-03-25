@@ -6,6 +6,16 @@
 Colony::Colony() {}
 Colony::~Colony() {}
 
+void Colony::addResourceAmount(int add_amount)
+{
+	m_totalResource += add_amount;
+}
+
+int Colony::getResourceAmount()
+{
+	return m_totalResource;
+}
+
 void Colony::addAnt(sf::Vector2f spawn_loc)
 {
 	//Ant dummyAnt(pblocker_systm_ptr);
@@ -17,6 +27,7 @@ void Colony::addAnt(sf::Vector2f spawn_loc)
 	newant.setRotation(init_faceangle);
 	newant.setRotation(init_faceangle);
 	newant.rememberCholePos(m_chole_position);
+	newant.m_colony = this;
 	//printf("Ant created! face angle = %f\n", init_faceangle);
 	ant_num++;
 	std::cout << "Ant added! Size = " << ant_num << std::endl;
@@ -33,6 +44,7 @@ void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture* ant_ski
 	this->m_pheromatrix_ptr = phero_mat_input;
 	std::cout << "Colony Initialized with pblock add:" << pblocker_systm_ptr << "\n";
 	std::cout << "size of Ant = " << AntContainer.size() << "\n";
+	this->m_totalResource = 0;
 }
 
 void Colony::drawColony(sf::RenderWindow* window, bool display_sensor)
