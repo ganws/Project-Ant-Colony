@@ -56,7 +56,7 @@ public:
 	void initAnt(float size, sf::Vector2f init_pos, sf::Texture *texture, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system, PheroMatrix* pheromat_sytm);
 	void updateMovement(float dt);
 	void secretPheromon(float dt, PheromoneSystem *psystem); //secret pheromone on spot
-	void secretPheromon2(float dt, PheroMatrix* phermatrix); //secret pheromone on spot (matrix version)
+	void secretPheromon2(float dt, PheroMatrix* phermatrix, int str); //secret pheromone on spot (matrix version)
 	void sensePheromone(); //sense pheromones around the ant
 	void drawSensoryCircle(sf::RenderWindow* window);
 

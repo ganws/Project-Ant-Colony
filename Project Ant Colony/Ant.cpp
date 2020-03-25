@@ -98,21 +98,12 @@ void Ant::secretPheromon(float dt, PheromoneSystem* psystem)
 	}
 }
 
-void Ant::secretPheromon2(float dt, PheroMatrix* pheroMat)
+void Ant::secretPheromon2(float dt, PheroMatrix* pheroMat, int add_strength)
 {
 	m_internal_clock = m_internal_clock + dt;
 	if (m_internal_clock >= m_pheromon_period) //secret pheromone at every fixed interval
 	{
-		switch (m_activity)
-		{
-		case Activity::GATHERING:
-			pheroMat->addStrength(this->getPosition(), 50);
-			break;
-
-		default:
-			pheroMat->addStrength(this->getPosition(), 50);
-			break;
-		}
+		pheroMat->addStrength(this->getPosition(), add_strength);
 		m_internal_clock = 0.0f; //restart clock
 	}
 }
@@ -497,6 +488,7 @@ void Ant::Update(float dt)
 		}
 		target_loc = this->computeMovementMatrix(dt);
 		this->issue_move_command(target_loc);
+		this->secretPheromon2(dt, pheromat_system_ptr, -5);
 	}
 	break;
 
@@ -562,7 +554,7 @@ void Ant::Update(float dt)
 
 		this->issue_move_command(target_loc);
 		this->updateMovement(dt);
-		this->secretPheromon2(dt, pheromat_system_ptr);
+		this->secretPheromon2(dt, pheromat_system_ptr, 50);
 
 		//update food scrap
 		m_food_scrap.setFillColor(sf::Color::Green);
