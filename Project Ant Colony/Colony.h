@@ -3,10 +3,12 @@
 #include "PathBlocker.h"
 #include "PheroMatrix.h"
 #include "SpatialPartition.h"
+#include "Terrain.h"
 
 class Colony;
 class Ant;
 class SpatialPartition;
+class Terrain;
 
 class Colony
 {
@@ -22,7 +24,8 @@ public:
 	void addAnt(sf::Vector2f spwn_loc);
 	void removeAnt();
 	void computeAntMove(float dt);
-	void initColony(std::vector<PathBlocker>* pb_ptr, sf::Texture *ant_skin_mian, PheroMatrix* pheromat_input, SpatialPartition *partition_input, std::vector<Food>* food_system_input);
+	void initColony(std::vector<PathBlocker>* pb_ptr, sf::Texture *ant_skin_mian, PheroMatrix* pheromat_input, 
+					SpatialPartition *partition_input, std::vector<Food>* food_system_input, Terrain* terrain_input);
 	void updateAntNum();
 	void drawColony(sf::RenderWindow* window, bool display_sensor);
 	int getAntNum();
@@ -38,6 +41,7 @@ private:
 	PheromoneSystem* pheromones_ptr { nullptr };
 	PheroMatrix* m_pheromatrix_ptr{nullptr};
 	SpatialPartition* m_partition_ptr{ nullptr };
+	Terrain* m_terrain_system_ptr{ nullptr };
 	sf::Vector2f m_chole_position{};
 	int m_totalResource;
 };

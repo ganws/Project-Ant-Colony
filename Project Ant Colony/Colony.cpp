@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Ant.h"
 #include "Colony.h"
 
 Colony::Colony() {}
@@ -28,15 +27,18 @@ void Colony::addAnt(sf::Vector2f spawn_loc)
 	newant.setRotation(init_faceangle);
 	newant.rememberCholePos(m_chole_position);
 	newant.m_colony = this;
+	newant.m_terrain_system_ptr = this->m_terrain_system_ptr;
 	//printf("Ant created! face angle = %f\n", init_faceangle);
 	ant_num++;
 	std::cout << "Ant added! Size = " << ant_num << std::endl;
 }
 
-void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture* ant_skin_main, PheroMatrix* phero_mat_input, SpatialPartition* partition_input, std::vector<Food>* food_system_input)
+void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture* ant_skin_main, PheroMatrix* phero_mat_input,
+						SpatialPartition* partition_input, std::vector<Food>* food_system_input, Terrain* terrain_sys_input)
 {
 	this->AntContainer.reserve(1000);
 	this->pblocker_systm_ptr = ptr_copy;
+	this->m_terrain_system_ptr = terrain_sys_input;
 	this->food_systm_ptr = food_system_input;
 	this->ant_skin = ant_skin_main;
 	this->m_partition_ptr = partition_input;
@@ -91,9 +93,9 @@ void Colony::computeAntMove(float dt)
 		{
 			//n.updateMovement(dt);
 			//n.secretPheromon(dt, pheromones_ptr);
-			sf::Vector2f tmp{};
-
+			this->m_terrain_system_ptr->clearAntCoeff(n);
 			n.Update(dt);
+			this->m_terrain_system_ptr->updateAntCoeff(n, 0);
 
 
 			//tmp = n.computeMovementMatrix(dt, m_pheromatrix_ptr);

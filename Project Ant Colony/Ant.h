@@ -10,6 +10,7 @@
 #include "constant.h"	
 #include "Food.h"
 #include "Colony.h"
+#include "Terrain.h"
 
 #include<random>
 #include<math.h>
@@ -72,6 +73,8 @@ public:
 	State getState(); //return all current states
 	void switchState(State state_target, bool new_state); //turning a state on and off 
 
+	sf::Vector2f getLastPos();
+
 	sf::Vector2f recallFoodLoc(); //recall food location
 	void rememberFoodLoc(sf::Vector2f food_loc); //remember food location
 	void forgetFoodLoc();
@@ -126,12 +129,14 @@ private:
 	// ant memory
 	sf::Vector2f m_chole_pos{}; //colony hole location
 	sf::Vector2f m_food_pos{}; //temporary food location in ant small memory
+	sf::Vector2f m_lastPos; //position of previous update
 
 	//environment pointers
 	std::vector<PathBlocker>* pblocker_systm_ptr{ nullptr };
 	std::vector<Food>* food_system_ptr{ nullptr };
 	PheroMatrix* pheromat_system_ptr{ nullptr };
 	Food* m_target_food{ nullptr };
+	Terrain* m_terrain_system_ptr{ nullptr };
 
 	friend class Colony;
 	Colony* m_colony;

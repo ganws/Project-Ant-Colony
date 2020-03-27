@@ -13,6 +13,7 @@
 #include "SpatialPartition.h"
 #include "Food.h"
 #include "Astar.h"
+#include "Terrain.h"
 
 #include<fstream>
 #include<SFML/Graphics.hpp>
@@ -32,6 +33,7 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(GameSetting::windowWidth, GameSetting::windowHeight), "Colony");
 	window.setFramerateLimit(GameSetting::FRAMERATE);
 	sf::View view(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
+	float zoom_factor{1.0};
 	sf::Clock gameclock;
 
 	float timeElapsed{ 0.0f };
@@ -98,10 +100,12 @@ int main()
 
 	//======PATH BLOCKERS========//
 	std::vector<PathBlocker> pblock_system;
-	PathBlocker pblock1(sf::Vector2f(100.0f, 100.0f), sf::Color::Blue, 30.0f);
-	pblock_system.push_back(pblock1);
-
 	drawMapBoundary(&pblock_system);
+
+	//=======TERRAIN SYSTEM========//
+	Terrain terrain_system(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(300,300));
+	for (auto &pb : pblock_system)
+		terrain_system.updateCoeff(pb);
 
 	//========LOAD SPATIAL PARTITIONING OBJECT===========//
 	SpatialPartition partition;
@@ -134,7 +138,7 @@ int main()
 	Food* newfood_ptr{nullptr};
 	//======CREATE COLONY==========//
 	Colony Colony1;
-	Colony1.initColony(&pblock_system, &skin, &PheroTiles, &partition, &food_system);
+	Colony1.initColony(&pblock_system, &skin, &PheroTiles, &partition, &food_system, &terrain_system);
 
 	//======COLONY HOLE===========//
 	sf::CircleShape Chole;
@@ -162,13 +166,13 @@ int main()
 			//move screen
 
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-				view.move(0.0f, 8.0f);
+				view.move(0.0f, 20.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-				view.move(0.0f, -8.0f);
+				view.move(0.0f, -20.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-				view.move(-8.0f, 0.0f);
+				view.move(-20.0f, 0.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-				view.move(8.0f, 0.0f);
+				view.move(20.0f, 0.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 				view.reset(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
 
@@ -286,6 +290,7 @@ int main()
 
 				case MOUSE_INPUT_MODE::PBLOCK:
 					pblock_system.push_back(PathBlocker(worldPos, sf::Color::Blue, 30.0f));
+					terrain_system.updateCoeff(pblock_system.back());
 					partition.updateCheckIndex(&pblock_system);
 					AstarSystem.updateObstacleNode(&pblock_system);
 					TilePath_Rough.updateObstacleNode(&pblock_system);
@@ -297,29 +302,29 @@ int main()
 					partition.addCheckIndex(food_system[food_system.size() - 1]);
 					
 					//compute path to colony hole
-					newfood_ptr = &food_system.back();
-					start_node_rough = TilePath_Rough.getNode(newfood_ptr->getPosition()); //node position of food
-					goal_node_rough = TilePath_Rough.getNode(Chole.getPosition()); //node position of colony
-					shortestPath_rough = TilePath_Rough.computePath(start_node_rough, goal_node_rough); //compute shortest path in Node position
-					foodpath = TilePath_Rough.getPathFromNode(shortestPath_rough);
-					newfood_ptr->storePath(foodpath);
-					
-					std::cout << "Food to colony path = \n";
-					for (auto path : foodpath)
-						printf("[%f][%f]\n", path.x, path.y);
+					//newfood_ptr = &food_system.back();
+					//start_node_rough = TilePath_Rough.getNode(newfood_ptr->getPosition()); //node position of food
+					//goal_node_rough = TilePath_Rough.getNode(Chole.getPosition()); //node position of colony
+					//shortestPath_rough = TilePath_Rough.computePath(start_node_rough, goal_node_rough); //compute shortest path in Node position
+					//foodpath = TilePath_Rough.getPathFromNode(shortestPath_rough);
+					//newfood_ptr->storePath(foodpath);
+					//
+					//std::cout << "Food to colony path = \n";
+					//for (auto path : foodpath)
+					//	printf("[%f][%f]\n", path.x, path.y);
 					break;
-				case MOUSE_INPUT_MODE::S_NODE:
-					startNode = AstarSystem.getNode(worldPos);
-					//printf("start = [%d][%d]\n", startNode->x, startNode->y);
-					shortestPath = AstarSystem.computePath(startNode, goalNode);
-					placement_mode = MOUSE_INPUT_MODE::EMPTY;
-					break;
-				case MOUSE_INPUT_MODE::E_NODE:
-					goalNode = AstarSystem.getNode(worldPos);
-					shortestPath = AstarSystem.computePath(startNode, goalNode);
-					//printf("goal = [%d][%d]\n", goalNode->x, goalNode->y);
-					placement_mode = MOUSE_INPUT_MODE::EMPTY;
-					break;
+				//case MOUSE_INPUT_MODE::S_NODE:
+				//	startNode = AstarSystem.getNode(worldPos);
+				//	//printf("start = [%d][%d]\n", startNode->x, startNode->y);
+				//	shortestPath = AstarSystem.computePath(startNode, goalNode);
+				//	placement_mode = MOUSE_INPUT_MODE::EMPTY;
+				//	break;
+				//case MOUSE_INPUT_MODE::E_NODE:
+				//	goalNode = AstarSystem.getNode(worldPos);
+				//	shortestPath = AstarSystem.computePath(startNode, goalNode);
+				//	//printf("goal = [%d][%d]\n", goalNode->x, goalNode->y);
+				//	placement_mode = MOUSE_INPUT_MODE::EMPTY;
+				//	break;
 				default:
 					break;
 				}
@@ -331,6 +336,15 @@ int main()
 				sf::Vector2i ClickPos = sf::Mouse::getPosition(window);
 				sf::Vector2f worldPos = window.mapPixelToCoords(ClickPos);
 
+			}
+
+			//======ZOOM======//
+			if (event.type == sf::Event::MouseWheelMoved)
+			{
+				float maxZoom = 2.0;
+				float minZoom = -2.0;
+				
+				zoom_factor += static_cast<float>(event.mouseWheel.delta) * -0.2;
 			}
 
 			//===============STRING COMMAND================//
@@ -391,6 +405,7 @@ int main()
 			}
 		}
 
+
 		//////////////////////////////////////////////////////////////////////////////
 		/////////////////////////	     END OF UI      //////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////
@@ -428,12 +443,15 @@ int main()
 
 
 		//=========clear window =================//
+		view.zoom(zoom_factor);
 		window.setView(view);
 		window.clear(sf::Color::White);
+		zoom_factor = 1;
 
 		//========= draw window =================//
 		window.draw(stat_antnum);
 		window.draw(stat_resource);
+		//window.draw(terrain_system);
 		if (show_pheromone) window.draw(PheroTiles);
 		Colony1.drawColony(&window, show_sensor);
 		window.draw(Chole);

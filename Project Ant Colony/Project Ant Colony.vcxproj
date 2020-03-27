@@ -39,6 +39,7 @@
     <ClCompile Include="SensoryCircle.cpp" />
     <ClCompile Include="SensoryInput.cpp" />
     <ClCompile Include="SpatialPartition.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="VectorFunction.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
@@ -62,6 +63,7 @@
     <ClInclude Include="SensoryCircle.h" />
     <ClInclude Include="SensoryInput.h" />
     <ClInclude Include="SpatialPartition.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="VectorFunction.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
