@@ -9,7 +9,7 @@ namespace GameSetting
 	extern const int windowWidth;
 
 	extern const float GAMESPEED; //normal speed = 1.0
-	extern const float FRAMERATE; //default = 60fps
+	extern const int FRAMERATE; //default = 60fps
 
 	extern const sf::Vector2f nullVector;
 	extern const sf::Vector2f oneVector;

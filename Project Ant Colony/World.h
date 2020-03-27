@@ -1,7 +1,5 @@
 #pragma once
 #include "Ant.h"
-#include "PheromoneSystem.h"
-#include "PathBlockerContainer.h"
 
 //world class that contains all interactable objects
 

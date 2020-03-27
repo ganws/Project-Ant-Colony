@@ -4,7 +4,6 @@
 #include "Ant.h"
 #include "VectorFunction.h"
 #include "Animation.h"
-#include "PheromoneSystem.h"
 #include "PathBlocker.h"
 #include "drawMapBoundary.h"
 #include "Colony.h"
@@ -212,7 +211,7 @@ int main()
 			//======TOGGLE SENSOR VISUAL==============//
 			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::S))
 			{
-				show_sensor = !show_sensor;
+				Colony1.dispSensor = !Colony1.dispSensor;
 				std::cout << "SENSOR VISUAL: " << show_sensor << "\n";
 			}
 
@@ -411,10 +410,6 @@ int main()
 		//////////////////////////////////////////////////////////////////////////////
 
 	//==========update frame==============//
-		
-
-		
-
 
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
 		if (timeElapsed > 1 / 20.0f)
@@ -433,7 +428,6 @@ int main()
 		}
 
 		//game stat update
-
 		partition.updateAntStatus(); //update ant collision check bool status
 		std::string colonysize = "Colony size: " + std::to_string(Colony1.getAntNum());
 		stat_antnum.setString(colonysize);
@@ -451,10 +445,11 @@ int main()
 		//========= draw window =================//
 		window.draw(stat_antnum);
 		window.draw(stat_resource);
-		//window.draw(terrain_system);
-		if (show_pheromone) window.draw(PheroTiles);
-		Colony1.drawColony(&window, show_sensor);
+		if (show_pheromone) 
+			window.draw(PheroTiles);
+		Colony1.drawColony(window);
 		window.draw(Chole);
+		//window.draw(terrain_system);
 		//window.draw(AstarSystem);
 		//window.draw(TilePath_Rough);
 		for (auto& n : pblock_system)

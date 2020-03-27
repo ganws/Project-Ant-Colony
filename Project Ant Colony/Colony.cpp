@@ -42,14 +42,13 @@ void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture* ant_ski
 	this->food_systm_ptr = food_system_input;
 	this->ant_skin = ant_skin_main;
 	this->m_partition_ptr = partition_input;
-	//this->pheromones_ptr = phr_ptr;
 	this->m_pheromatrix_ptr = phero_mat_input;
 	std::cout << "Colony Initialized with pblock add:" << pblocker_systm_ptr << "\n";
 	std::cout << "size of Ant = " << AntContainer.size() << "\n";
 	this->m_totalResource = 0;
 }
 
-void Colony::drawColony(sf::RenderWindow* window, bool display_sensor)
+void Colony::drawColony(sf::RenderWindow &window)
 {
 	if (AntContainer.size() != 0)
 	{
@@ -59,10 +58,10 @@ void Colony::drawColony(sf::RenderWindow* window, bool display_sensor)
 			//std::cout << "antdraw! \n";
 			if (n.m_visible)
 			{
-				window->draw(n);
-				window->draw(n.m_food_scrap);
+				window.draw(n);
+				window.draw(n.m_food_scrap);
 			}
-			if (display_sensor)
+			if (dispSensor)
 				n.drawSensoryCircle(window);
 			//k++;
 		}
@@ -88,59 +87,11 @@ void Colony::computeAntMove(float dt)
 {
 	if (AntContainer.size() != 0)
 	{
-		//std::cout << AntContainer[0].pblocker_systm_ptr;
 		for (auto& n : AntContainer)
 		{
-			//n.updateMovement(dt);
-			//n.secretPheromon(dt, pheromones_ptr);
 			this->m_terrain_system_ptr->clearAntCoeff(n);
 			n.Update(dt);
 			this->m_terrain_system_ptr->updateAntCoeff(n, 0);
-
-
-			//tmp = n.computeMovementMatrix(dt, m_pheromatrix_ptr);
-			//if (n.getActivity() == Activity::GATHERING)
-			//n.issue_move_command(tmp);
-
-			/*switch (n.getActivity())
-			{
-			case Activity::FORAGING:
-				tmp = n.computeMovementMatrix(dt);
-				break;
-
-			case Activity::GATHERING:
-				if (n.m_state.CARRYING)
-				{
-					n.secretPheromon2(dt, m_pheromatrix_ptr);
-					tmp = n.computeMovement_colony(dt, m_pheromatrix_ptr, m_chole_position);
-					if (n.getGlobalBounds().contains(m_chole_position))
-					{
-						n.m_state.CARRYING = false;
-						n.switchActivity(Activity::FORAGING);
-					}
-				}
-				break;
-			default:
-				break;
-			}
-
-			n.issue_move_command(tmp);*/
 		}
-
-		//check collision via spatial partitioning
-		//for (auto chckIndx : m_partition_ptr->checkIndex)
-		//{
-		//	for (auto &ant : m_partition_ptr->m_Partition[chckIndx].ant_ptr)
-		//	{
-		//		for (auto& p : *pblocker_systm_ptr)
-		//		{
-		//			if (p.getGlobalBounds().intersects(ant->getGlobalBounds()))
-		//			{
-		//				sf::Vector2f faceVector = ant->getPosition() - p.getPosition();
-		//				//ant->issue_move_command(sf::Vector2f(500, 500));
-		//			}
-		//		}
-		//	}
-		//}
 	}
 }

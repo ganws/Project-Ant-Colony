@@ -1,8 +1,6 @@
 #pragma once
 
 #include"AntState.h"
-#include"SensoryInput.h"
-#include"PheromoneSystem.h"
 #include "VectorFunction.h"
 #include "PathBlocker.h"
 #include "Animation.h"
@@ -26,7 +24,7 @@ class Ant : public sf::Sprite
 {
 public:
 
-	//constant states
+	//constant stats
 	float m_movespeed{ 120.0f }; //movespeed in pixel per second
 	float m_rotatespeed{ 530.0f }; //degree per sec;
 	float m_HP{}; //hitpoint
@@ -41,9 +39,6 @@ public:
 
 	std::vector<sf::CircleShape> SensoryTracker; //for debug
 
-	//SensoryInput m_sensory_input{m_r1,m_scircle_count, this->getPosition(), m_active_num}; //create sensory circles
-
-
 	sf::Vector2f m_targetCoord{ 0.0,0.0 };  //absolute coordinate vector in map
 	float m_targetFaceAngle{}; //absolute angle [0, 360)
 
@@ -52,24 +47,25 @@ public:
 
 	//constructor, destructor
 	Ant();
-	//Ant(std::vector<PathBlocker> *pblock_systm); //constructor
 	Ant(const Ant& obj);
-	~Ant(); //destructor
+	~Ant();
 
 	void Update(float dt);
 
 	void initAnt(float size, sf::Vector2f init_pos, sf::Texture* texture, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system, PheroMatrix* pheromat_sytm);
 	void updateMovement(float dt);
-	void secretPheromon(float dt, PheromoneSystem* psystem); //secret pheromone on spot
-	void secretPheromon2(float dt, PheroMatrix* phermatrix, int str); //secret pheromone on spot (matrix version)
-	void sensePheromone(); //sense pheromones around the ant
-	void drawSensoryCircle(sf::RenderWindow* window);
+
+	// pheromones interaction
+	void secretPheromon2(float dt, PheroMatrix* phermatrix, float str); //secret pheromone on spot (matrix version)
+	void drawSensoryCircle(sf::RenderWindow &window);
 
 	//getting and setter
-	float getMoveSpeed();
 	void setMoveSpeed(float movespeed);
-	Activity getActivity(); //return current activity
+	float getMoveSpeed();
+
 	void switchActivity(Activity new_activity); //switch to new activity
+	Activity getActivity(); //return current activity
+
 	State getState(); //return all current states
 	void switchState(State state_target, bool new_state); //turning a state on and off 
 
@@ -86,8 +82,7 @@ public:
 	void issue_move_command(sf::Vector2f coordinate); //issue move command. Issuing this command
 	void issue_face_command(float facingAngle); //rotate ants (in degree)
 
-	//======FORAGING=======//
-	//int computeMoveTarget(); //compute
+	// compute movement
 	sf::Vector2f computeMovementMatrix(float dt); //foraging movement
 	sf::Vector2f computeMovement_colony(float dt, sf::Vector2f colony_hole_pos); //find way back to colony
 
@@ -106,6 +101,9 @@ private:
 		ENTERHOLE,
 		IDLE
 	};
+	State m_currentState{State::FORAGING}; //Ant current state
+	Activity m_activity{}; //ant can only engage in one activity at one time
+	Animation ant_animation;
 
 	//timer
 	sf::Clock m_foodCollectTimer;
@@ -116,20 +114,17 @@ private:
 	sf::CircleShape m_food_scrap;
 
 	//sensors
-	State m_currentState; //Ant current state
-	std::vector<unsigned int> m_Ci; //strength of sensor
+	std::vector<float> m_Ci; //strength of sensor
 	unsigned int m_sensorNumPerSide{ 3 }; //sensors per side
 	float m_sensorSpacing{ 5 }; // space between sensor
 	std::vector<sf::Vector2f> m_sensorPosition; // sensor positions
-	Activity m_activity{}; //ant can only engage in one activity at one time
-	Animation ant_animation;
-	std::list <sf::Vector2f> m_MoveQueue;
-	sf::Vector2f m_lock_position; //fixed target location to move to
 
 	// ant memory
 	sf::Vector2f m_chole_pos{}; //colony hole location
 	sf::Vector2f m_food_pos{}; //temporary food location in ant small memory
 	sf::Vector2f m_lastPos; //position of previous update
+	sf::Vector2f m_lock_position; //fixed target location to move to
+	std::list <sf::Vector2f> m_MoveQueue;
 
 	//environment pointers
 	std::vector<PathBlocker>* pblocker_systm_ptr{ nullptr };
