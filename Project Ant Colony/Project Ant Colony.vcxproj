@@ -31,13 +31,8 @@
     <ClCompile Include="GameSetting.cpp" />
     <ClCompile Include="Hashit.cpp" />
     <ClCompile Include="PathBlocker.cpp" />
-    <ClCompile Include="PathBlockerContainer.cpp" />
     <ClCompile Include="PheroMatrix.cpp" />
-    <ClCompile Include="Pheromone.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="PheromoneSystem.cpp" />
-    <ClCompile Include="SensoryCircle.cpp" />
-    <ClCompile Include="SensoryInput.cpp" />
     <ClCompile Include="SpatialPartition.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="VectorFunction.cpp" />
@@ -56,12 +51,7 @@
     <ClInclude Include="GameSetting.h" />
     <ClInclude Include="Hashit.h" />
     <ClInclude Include="PathBlocker.h" />
-    <ClInclude Include="PathBlockerContainer.h" />
     <ClInclude Include="PheroMatrix.h" />
-    <ClInclude Include="Pheromone.h" />
-    <ClInclude Include="PheromoneSystem.h" />
-    <ClInclude Include="SensoryCircle.h" />
-    <ClInclude Include="SensoryInput.h" />
     <ClInclude Include="SpatialPartition.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="VectorFunction.h" />

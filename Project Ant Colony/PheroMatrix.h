@@ -17,17 +17,23 @@ public:
 	void resetPheromone();
 
 private:
+	std::vector<float> m_strengthmatrix; //2d array
+
+	int m_tile_width;
+	int m_tile_height;
+
+	float m_decay_rate{ 1.2f };
+	float m_initial_strength{ 100.0f }; //initial strength of newly created particle
+
+	sf::Vector2u m_resolution; //num of tiles *
+	sf::VertexArray m_tilevertices; //to visualize the strength of each tile
+
+public:
+
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
 	{
 		// draw the vertex array
 		target.draw(m_tilevertices, states);
 	}
 
-	int m_tile_width;
-	int m_tile_height;
-	float m_decay_rate{ 1.2 };
-	float m_initial_strength{ 100.0f }; //initial strength of newly created particle
-	sf::Vector2u m_resolution; //num of tiles *
-	std::vector<float> m_strengthmatrix; //2d array
-	sf::VertexArray m_tilevertices; //to visualize the strength of each tile
 };

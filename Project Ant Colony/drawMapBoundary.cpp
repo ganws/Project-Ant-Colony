@@ -5,8 +5,8 @@ void drawMapBoundary(std::vector<PathBlocker>* pblock_systm)
 	PathBlocker dummyPB;
 	float PB_length = dummyPB.getSize().x; //get length of path blocker
 	
-	int PBnum_top_botm = ceil( GameSetting::windowWidth / PB_length);
-	int PBnum_left_right = ceil(GameSetting::windowHeight / PB_length)+2;
+	int PBnum_top_botm = static_cast<int>(ceil( GameSetting::windowWidth / PB_length));
+	int PBnum_left_right = static_cast<int>(ceil(GameSetting::windowHeight / PB_length)+2);
 
 	//=========TOP============//
 	PathBlocker* pb_top;

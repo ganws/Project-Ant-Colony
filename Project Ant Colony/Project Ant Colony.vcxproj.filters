@@ -27,28 +27,13 @@
     <ClCompile Include="Animation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Pheromone.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PheromoneSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AntState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SensoryInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="constant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SensoryCircle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PathBlocker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PathBlockerContainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="World.cpp">
@@ -101,25 +86,10 @@
     <ClInclude Include="Animation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Pheromone.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PheromoneSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AntState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SensoryInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SensoryCircle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PathBlocker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PathBlockerContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="World.h">
