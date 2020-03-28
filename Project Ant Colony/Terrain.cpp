@@ -93,14 +93,14 @@ void Terrain::updateAntCoeff(Ant& ant, int coeff)
 {
 
 	sf::Vector2f ant_size = ant.m_size;
-	ant_size = scalarProduct(ant_size, 0.2);
+	ant_size = scalarProduct(ant_size, 0.2f);
 
 	//get 4 corners in tilePos
 	sf::Vector2u topleft = mapCoordsToPos(ant.getPosition() + sf::Vector2f(-ant_size.x / 2, -ant_size.y / 2));
 	sf::Vector2u botright = mapCoordsToPos(ant.getPosition() + sf::Vector2f(ant_size.x / 2, ant_size.y / 2));
 
-	for (int x = topleft.x; x <= botright.x; x++)
-		for (int y = topleft.y; y <= botright.y; y++)
+	for (unsigned int x = topleft.x; x <= botright.x; x++)
+		for (unsigned int y = topleft.y; y <= botright.y; y++)
 		{
 			m_collisionCoeff[x + y * m_resolution.x] = coeff;
 		}
@@ -117,8 +117,8 @@ void Terrain::clearAntCoeff(Ant& ant)
 	sf::Vector2u topleft = mapCoordsToPos(ant_las_pos + sf::Vector2f(-ant_size.x / 2, -ant_size.y / 2));
 	sf::Vector2u botright = mapCoordsToPos(ant_las_pos + sf::Vector2f(ant_size.x / 2, ant_size.y / 2));
 
-	for (int x = topleft.x; x <= botright.x; x++)
-		for (int y = topleft.y; y <= botright.y; y++)
+	for (unsigned int x = topleft.x; x <= botright.x; x++)
+		for (unsigned int y = topleft.y; y <= botright.y; y++)
 		{
 			m_collisionCoeff[x + y * m_resolution.x] = 1;
 		}
@@ -142,16 +142,13 @@ sf::Vector2u Terrain::mapCoordsToPos(sf::Vector2f worldPos)
 	if ((pathPos.x) >= m_resolution.x)
 	{
 		pathPos.x = (m_resolution.x - 1);
-		//std::cout << "outbound correctin\n";
 	}
 	if ((pathPos.y) >= m_resolution.y)
 	{
 		pathPos.y = (m_resolution.y - 1);
-		//std::cout << "outbound correctin\n";
 	}
 
 	//printf("worldPos[%f %f] -> tilePos[%d %d]\n", worldPos.x, worldPos.y, nodePos.x, nodePos.y);
-
 	return pathPos;
 }
 

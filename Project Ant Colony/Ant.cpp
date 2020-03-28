@@ -247,7 +247,13 @@ sf::Vector2f Ant::computeMovementMatrix(float dt)
 
 	//create discrete distribution
 	m_Ci[0] *= 5.0f;
-	std::discrete_distribution<> str_PDistrib(m_Ci.begin(), m_Ci.end());
+
+	std::vector<int> Ci;
+	Ci.resize(sensorTotalNum);
+	for (unsigned int i = 0; i < sensorTotalNum; i++)
+		Ci[i] = static_cast<int> (m_Ci[i]);
+
+	std::discrete_distribution<> str_PDistrib(Ci.begin(), Ci.end());
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -357,7 +363,13 @@ sf::Vector2f Ant::computeMovement_colony(float dt, sf::Vector2f colony_hole_pos)
 
 	//create discrete distribution
 	//m_Ci[0] *= 5;
-	std::discrete_distribution<> str_PDistrib(m_Ci.begin(), m_Ci.end());
+
+	std::vector<int> Ci;
+	Ci.resize(sensorTotalNum);
+	for (unsigned int i = 0; i < sensorTotalNum; i++)
+		Ci[i] = static_cast<int> (m_Ci[i]);
+
+	std::discrete_distribution<> str_PDistrib(Ci.begin(), Ci.end());
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -509,7 +521,7 @@ void Ant::Update(float dt)
 		if (timer.asSeconds() > holeTime)
 		{
 			float currentRotation = this->getRotation();
-			this->setRotation(currentRotation - 180.0);
+			this->setRotation(currentRotation - 180.0f);
 			m_visible = true;
 			m_currentState = State::FORAGING;
 			m_food_scrap.setFillColor(sf::Color::Transparent); //remove food scrap

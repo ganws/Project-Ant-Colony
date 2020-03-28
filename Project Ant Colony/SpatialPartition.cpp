@@ -11,11 +11,10 @@ void SpatialPartition::initSpatialPartition(int world_width, int world_height, s
 	m_resolution.y = resolution_param.y;
 
 	//dimension of a partition unit
-	m_partition_height = world_height / m_resolution.y;
-	m_partition_width = world_width / m_resolution.x;
+	m_partition_height = static_cast<float>(world_height / m_resolution.y);
+	m_partition_width = static_cast<float>(world_width / m_resolution.x);
 
 	m_Partition.resize(m_resolution.x * m_resolution.y);
-
 	checkIndex.resize(m_resolution.x * m_resolution.y);
 }
 
@@ -57,8 +56,8 @@ void SpatialPartition::updatePartition(Ant* ant, sf::Vector2f ant_worldPos)
 
 void SpatialPartition::clearPartition()
 {
-	for (int i = 0; i < m_resolution.x; i++)
-		for (int j = 0; j < m_resolution.y; j++)
+	for (unsigned int i = 0; i < m_resolution.x; i++)
+		for (unsigned int j = 0; j < m_resolution.y; j++)
 		{
 			m_Partition[i + j * m_resolution.x].ant_ptr.clear();
 		}

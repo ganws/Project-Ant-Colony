@@ -1,7 +1,6 @@
 namespace constants
 {
     // actual global variables
-    extern const double pi{ 3.14159 };
-    extern const double avogadro{ 6.0221413e23 };
-    extern const double near_zero{ 0.001 };
+    extern const float pi{ 3.14159f };
+    extern const float near_zero{ 0.001f };
 }

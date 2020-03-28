@@ -21,7 +21,7 @@ void Colony::addAnt(sf::Vector2f spawn_loc)
 	//dummyAnt.initAnt(0.1, spawn_loc, ant_skin);
 	this->AntContainer.push_back(Ant());
 	Ant& newant = AntContainer[AntContainer.size() - 1];
-	newant.initAnt(0.1, spawn_loc, ant_skin, pblocker_systm_ptr, food_systm_ptr, m_pheromatrix_ptr);
+	newant.initAnt(0.1f, spawn_loc, ant_skin, pblocker_systm_ptr, food_systm_ptr, m_pheromatrix_ptr);
 	float init_faceangle{ static_cast<float>(rand() / (RAND_MAX / 360)) };
 	newant.setRotation(init_faceangle);
 	newant.setRotation(init_faceangle);

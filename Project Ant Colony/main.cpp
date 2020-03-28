@@ -31,7 +31,7 @@ int main()
 	//////////////////////////////////////////////////////////////////////////////
 	sf::RenderWindow window(sf::VideoMode(GameSetting::windowWidth, GameSetting::windowHeight), "Colony");
 	window.setFramerateLimit(GameSetting::FRAMERATE);
-	sf::View view(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
+	sf::View view(sf::FloatRect(0.0f, 0.0f, float(GameSetting::windowWidth), float(GameSetting::windowHeight)));
 	float zoom_factor{1.0};
 	sf::Clock gameclock;
 
@@ -70,14 +70,14 @@ int main()
 	stat_antnum.setFont(fontArial);
 	stat_antnum.setFillColor(sf::Color::Black);
 	stat_antnum.setCharacterSize(25);
-	stat_antnum.setPosition(GameSetting::windowWidth - 500, 10);
+	stat_antnum.setPosition(float(GameSetting::windowWidth - 500), float(10));
 
 	sf::Text stat_resource;
 	stat_resource.setString("Resource:");
 	stat_resource.setFont(fontArial);
 	stat_resource.setFillColor(sf::Color::Black);
 	stat_resource.setCharacterSize(25);
-	stat_resource.setPosition(GameSetting::windowWidth - 200, 10);
+	stat_resource.setPosition(float(GameSetting::windowWidth - 200), float(10));
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ int main()
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 				view.move(20.0f, 0.0f);
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-				view.reset(sf::FloatRect(0.0f, 0.0f, GameSetting::windowWidth, GameSetting::windowHeight));
+				view.reset(sf::FloatRect(0.0f, 0.0f, float(GameSetting::windowWidth), float(GameSetting::windowHeight)));
 
 			//======TOGGLE ALT==============//
 			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::LAlt))
@@ -343,7 +343,7 @@ int main()
 				float maxZoom = 2.0;
 				float minZoom = -2.0;
 				
-				zoom_factor += static_cast<float>(event.mouseWheel.delta) * -0.2;
+				zoom_factor += static_cast<float>(event.mouseWheel.delta) * -0.2f;
 			}
 
 			//===============STRING COMMAND================//
