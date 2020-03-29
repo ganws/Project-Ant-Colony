@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include<math.h>
+#include <iostream>
+#include <assert.h>
 
 float dotProduct(sf::Vector2f v1, sf::Vector2f v2); // dotproduct
 float normVector(sf::Vector2f v); //compute vector length
@@ -19,4 +21,11 @@ inline sf::Vector2f& operator * (int left, const sf::Vector2f& right)
 {
 	sf::Vector2f tmp(left * right.x, left * right.y);
 	return tmp;
+}
+
+template<class T>
+constexpr const T& clamp(const T& v, const T& lo, const T& hi)
+{
+	assert(!(hi < lo));
+	return (v < lo) ? lo : (hi < v) ? hi : v;
 }

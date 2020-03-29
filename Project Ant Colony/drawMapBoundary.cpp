@@ -5,8 +5,8 @@ void drawMapBoundary(std::vector<PathBlocker>* pblock_systm)
 	PathBlocker dummyPB;
 	float PB_length = dummyPB.getSize().x; //get length of path blocker
 	
-	int PBnum_top_botm = static_cast<int>(ceil( GameSetting::windowWidth / PB_length));
-	int PBnum_left_right = static_cast<int>(ceil(GameSetting::windowHeight / PB_length)+2);
+	int PBnum_top_botm = static_cast<int>(ceil( GameSetting::worldWidth / PB_length));
+	int PBnum_left_right = static_cast<int>(ceil(GameSetting::worldHeight / PB_length)+2);
 
 	//=========TOP============//
 	PathBlocker* pb_top;
@@ -26,7 +26,7 @@ void drawMapBoundary(std::vector<PathBlocker>* pblock_systm)
 	for (int n = 0; n < PBnum_top_botm; n++)
 	{
 
-		sf::Vector2f placment_pos = sf::Vector2f(n * PB_length + PB_length / 2, GameSetting::windowHeight +  PB_length / 2);
+		sf::Vector2f placment_pos = sf::Vector2f(n * PB_length + PB_length / 2, GameSetting::worldHeight +  PB_length / 2);
 		sf::Color PBColor = sf::Color::Blue;
 		(pb_bot + n)->initPathBlocker(placment_pos, PBColor, PB_length);
 		pblock_systm->push_back(*(pb_bot + n));
@@ -50,7 +50,7 @@ void drawMapBoundary(std::vector<PathBlocker>* pblock_systm)
 	for (int n = 0; n < PBnum_left_right; n++)
 	{
 
-		sf::Vector2f placment_pos = sf::Vector2f(GameSetting::windowWidth+PB_length / 2, PB_length * n - PB_length / 2);
+		sf::Vector2f placment_pos = sf::Vector2f(GameSetting::worldWidth+PB_length / 2, PB_length * n - PB_length / 2);
 		sf::Color PBColor = sf::Color::Blue;
 		(pb_right + n)->initPathBlocker(placment_pos, PBColor, PB_length);
 		pblock_systm->push_back(*(pb_right + n));

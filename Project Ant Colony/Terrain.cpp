@@ -1,8 +1,6 @@
 #include "Terrain.h"
 
-
-
-Terrain::Terrain(int world_width, int world_height, sf::Vector2u resolution)
+Terrain::Terrain(float world_width, float world_height, sf::Vector2u resolution)
 {
 	this->m_resolution = resolution;
 	this->m_totalTiles = resolution.x * resolution.y;

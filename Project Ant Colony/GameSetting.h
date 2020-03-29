@@ -1,5 +1,4 @@
-#ifndef GAMESETTING_H
-#define GAMESETTING_H
+#pragma once
 
 #include<SFML/Graphics.hpp>
 
@@ -8,10 +7,9 @@ namespace GameSetting
 	extern const int windowHeight;
 	extern const int windowWidth;
 
+	extern const float worldWidth;
+	extern const float worldHeight;
+
 	extern const float GAMESPEED; //normal speed = 1.0
 	extern const int FRAMERATE; //default = 60fps
-
-	extern const sf::Vector2f nullVector;
-	extern const sf::Vector2f oneVector;
 }
-#endif // !GAMESETTING_H

@@ -16,7 +16,7 @@ public:
 	std::vector<int> m_collisionCoeff;
 
 public:
-	Terrain(int game_width, int game_height, sf::Vector2u resolution);
+	Terrain(float game_width, float game_height, sf::Vector2u resolution);
 	~Terrain();
 	void colorPath(int u, int v, sf::Color color_input, unsigned int alpha_input=255);
 	sf::Vector2u mapIndx2Coord(const int indx);

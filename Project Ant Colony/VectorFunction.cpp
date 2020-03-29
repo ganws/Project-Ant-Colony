@@ -3,6 +3,8 @@
 
 float normVector (sf::Vector2f v)
 {
+	if (isnan(sqrt(v.x * v.x + v.y * v.y)))
+		std::cout << "SQRT NAN DETECTED\n";
 	return sqrt(v.x*v.x + v.y*v.y);
 }
 
@@ -14,6 +16,18 @@ float dotProduct(sf::Vector2f v1, sf::Vector2f v2)
 float vectorAngle(sf::Vector2f v1, sf::Vector2f v2)
 {
 	float cosA = dotProduct(v1, v2) / (normVector(v1) * normVector(v2));
+	if (cosA > 1.0f)
+	{
+		cosA = 0.9999f;
+		std::cout << "NAN DETECTED and CORRECTED \n" ;
+	}
+	if (cosA < -1.0f)
+	{
+		cosA = -0.9999f;
+		std::cout << "-NAN DETECTED and CORRECTED \n";
+	}
+
+	if (isnan(acos(-cosA)))
 		return acos(-cosA);
 }
 

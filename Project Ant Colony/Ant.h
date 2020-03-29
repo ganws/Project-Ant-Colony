@@ -53,10 +53,10 @@ public:
 	void Update(float dt);
 
 	void initAnt(float size, sf::Vector2f init_pos, sf::Texture* texture, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system, PheroMatrix* pheromat_sytm);
-	void updateMovement(float dt);
+	void transformAnt(float dt);
 
 	// pheromones interaction
-	void secretPheromon2(float dt, PheroMatrix* phermatrix, float str); //secret pheromone on spot (matrix version)
+	void secretPheromon(float dt, PheroMatrix* phermatrix, float str); //secret pheromone on spot (matrix version)
 	void drawSensoryCircle(sf::RenderWindow &window);
 
 	//getting and setter
@@ -80,10 +80,10 @@ public:
 
 	// Command function
 	void issue_move_command(sf::Vector2f coordinate); //issue move command. Issuing this command
-	void issue_face_command(float facingAngle); //rotate ants (in degree)
+	void issue_rotate_command(float facingAngle); //rotate ants (in degree)
 
 	// compute movement
-	sf::Vector2f computeMovementMatrix(float dt); //foraging movement
+	sf::Vector2f computeMovement(float dt); //foraging movement
 	sf::Vector2f computeMovement_colony(float dt, sf::Vector2f colony_hole_pos); //find way back to colony
 
 private:
@@ -110,12 +110,13 @@ private:
 	sf::Clock m_enterHoleTimer;
 
 	//gather
-	int gather_amount;
+	int m_gather_amount;
 	sf::CircleShape m_food_scrap;
 
 	//sensors
-	std::vector<float> m_Ci; //strength of sensor
+	std::vector<int> m_Ci; //strength of sensor
 	unsigned int m_sensorNumPerSide{ 3 }; //sensors per side
+	unsigned int m_sensorNumTotal;
 	float m_sensorSpacing{ 5 }; // space between sensor
 	std::vector<sf::Vector2f> m_sensorPosition; // sensor positions
 

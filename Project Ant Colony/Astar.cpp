@@ -106,8 +106,7 @@ float Astar::computeHeuristic(Node* a, Node* b)
 	return  tmp;
 }
 
-
-std::list<Node*> Astar::computePath(Node* start_node, Node* goal_node)
+std::list<Node*> Astar::computeNodePath(Node* start_node, Node* goal_node)
 {
 	//reset all nodes
 	for (auto& n : m_Nodes)
@@ -268,7 +267,6 @@ sf::Vector2u Astar::mapCoordsToPos(sf::Vector2f worldPos)
 
 	return nodePos;
 }
-
 sf::Vector2f Astar::mapPosToCoord(Node* target_node)
 {
 	return sf::Vector2f(target_node->x * m_node_width + m_node_width / 2, target_node->y * m_node_height + m_node_height / 2);
@@ -299,4 +297,19 @@ std::vector<sf::Vector2f> Astar::getPathFromNode(std::list<Node*> path)
 	}
 
 	return path_wordcoord;
+}
+
+std::vector<sf::Vector2f> Astar::computePath(sf::Vector2f startPos, sf::Vector2f endPos)
+{
+	sf::Vector2u startIndx = this->mapCoordsToPos(startPos);
+	sf::Vector2u endIndx = this->mapCoordsToPos(endPos);
+
+	Node* startNode = getNode(startPos);
+	Node* endNode = getNode(endPos);
+
+	std::list<Node*> nodePath = computeNodePath(startNode, endNode);
+	std::vector<sf::Vector2f> worldPath = getPathFromNode(nodePath);
+
+	return worldPath;
+
 }

@@ -8,7 +8,7 @@ class PheroMatrix : public sf::Drawable
 public:
 	PheroMatrix();
 	~PheroMatrix();
-	void initPheroMatrix(int world_width, int world_height, sf::Vector2u resolution_param);
+	void initPheroMatrix(float world_width, float world_height, sf::Vector2u resolution_param);
 	void setDecayRate(float value_set);
 	void pheromoneDecay(float dt);
 	void addStrength(sf::Vector2f worldPos, float input_str);

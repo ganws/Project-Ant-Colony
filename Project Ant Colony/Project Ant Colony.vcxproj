@@ -23,6 +23,7 @@
     <ClCompile Include="Ant.cpp" />
     <ClCompile Include="AntState.cpp" />
     <ClCompile Include="Astar.cpp" />
+    <ClCompile Include="GameStateMachine.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Colony.cpp" />
     <ClCompile Include="constant.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="Ant.h" />
     <ClInclude Include="AntState.h" />
     <ClInclude Include="Astar.h" />
+    <ClInclude Include="GameStateMachine.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Colony.h" />
     <ClInclude Include="constant.h" />

@@ -4,21 +4,19 @@
 PheroMatrix::PheroMatrix() {}
 PheroMatrix::~PheroMatrix() {}
 
-void PheroMatrix::initPheroMatrix(int world_width, int world_height, sf::Vector2u resolution_param)
+void PheroMatrix::initPheroMatrix(float world_width, float world_height, sf::Vector2u resolution_param)
 {
-
-	// throw an error if world dimension is not divisible by resolution
-	if (static_cast<bool>(world_height % resolution_param.y + world_width % resolution_param.x))
-		std::cout << "ERROR: Pheromone Matrix- World dimension must be perfectly divisible by resolution\n";
 
 	//Initializatoin
 	m_resolution.x = resolution_param.x;
 	m_resolution.y = resolution_param.y;
 
+
 	//calculate tile dimensions
 	m_tile_height = world_height / m_resolution.y;
 	m_tile_width = world_width / m_resolution.x;
 	
+	printf("resolution = %f x %f\n", m_tile_width, m_tile_width);
 	m_strengthmatrix.resize(m_resolution.x * m_resolution.y);
 
 	m_tilevertices.setPrimitiveType(sf::Quads);
@@ -62,11 +60,12 @@ void PheroMatrix::pheromoneDecay(float dt)
 			{
 				float& str = m_strengthmatrix[i + j * m_resolution.x];
 				str = str - m_decay_rate * dt;
-				if (str <= 0)
+				if (str <= 0.0f)
 					str = 0.0;
 
 				alpha = str / (m_initial_strength * 5); //maximum opacity= 5 stacked instances
-				if (alpha > 1.0) alpha = 1.0;
+				if (alpha > 1.0)
+					alpha = 1.0f;
 				alpha *= 255;
 
 				//visual update
@@ -87,6 +86,9 @@ void PheroMatrix::addStrength(sf::Vector2f worldPos, float input_str)
 	str = str + input_str;
 	if (str >= maxStrength)
 		str = maxStrength;
+
+	if (str < 0.0f)
+		str = 0.0f;
 }
 
 sf::Vector2u PheroMatrix::mapCoordsToPos(sf::Vector2f worldPos)

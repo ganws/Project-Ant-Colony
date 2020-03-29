@@ -1,19 +1,17 @@
 #include "Ant.h"
 
-//member funciton definition
-
-//constructor
 Ant::Ant() {};
 Ant::Ant(const Ant& obj) {};
-Ant::~Ant() {}; //destructor
+Ant::~Ant() {};
 
 void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture* skin, std::vector<PathBlocker>* arg_pblock_system,
 	std::vector<Food>* arg_food_system, PheroMatrix* arg_pheromat_system)
 {
 	//sensor init
-	m_sensorPosition.resize(m_sensorNumPerSide * 2 + 1); //include the middle sensor
-	m_Ci.resize(m_sensorNumPerSide * 2 + 1);
-	SensoryTracker.resize(m_sensorNumPerSide * 2 + 1);
+	m_sensorNumTotal = m_sensorNumPerSide * 2 + 1; //total sensor numbers, include the middle sensor
+	m_sensorPosition.resize(m_sensorNumTotal);//sensor position array
+	m_Ci.resize(m_sensorNumTotal); //weight array
+	SensoryTracker.resize(m_sensorNumTotal); //sensor ball array
 	for (auto& s : SensoryTracker)
 	{
 		s.setFillColor(sf::Color::Red);
@@ -25,8 +23,6 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture* skin, std::vec
 	m_food_scrap.setFillColor(sf::Color::Transparent);
 	m_food_scrap.setRadius(3);
 	m_food_scrap.setOrigin(m_food_scrap.getRadius(), m_food_scrap.getRadius());
-
-
 
 	//Texture and size
 	int skin_length = skin->getSize().x / 8; // length of single frame from animation
@@ -51,8 +47,6 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture* skin, std::vec
 	ant_animation.InitAnimation(skin, sf::Vector2u(8, 8), 62, 0.01f);
 }
 
-
-//=======issue move command=====
 void Ant::issue_move_command(sf::Vector2f coordinate)
 {
 	m_targetCoord = coordinate; //coordinate vector
@@ -64,22 +58,162 @@ void Ant::issue_move_command(sf::Vector2f coordinate)
 
 	float cosX = dotProduct(xUnitVector, moveVector) / (normVector(moveVector) * normVector(xUnitVector));
 
-	if (cosX > 0)
+	if (cosX > 0.0f)
 		faceAngle = 360 - faceAngle;
 
-	issue_face_command(faceAngle);
-	//std::cout << "move command issued: [" << coordinate.x << "  " << coordinate.y << "], rotate " << faceAngle << " deg.\n";
+	issue_rotate_command(faceAngle);
 }
-
-//=====issue rotate command=====
-void Ant::issue_face_command(float facingAngle)
+void Ant::issue_rotate_command(float facingAngle)
 {
 	m_targetFaceAngle = facingAngle;
 }
 
-
 // frame update
-void Ant::updateMovement(float dt)
+void Ant::Update(float dt)
+{
+	sf::Vector2f target_loc;
+	sf::Time timer;
+
+	switch (m_currentState)
+	{
+	case State::FORAGING:
+	{
+		this->transformAnt(dt);
+		float smellMaxDist = 100.0f; //how far can the ant smell
+
+		for (auto& food_particle : *food_system_ptr)
+		{
+			float foodDist = dist2Vec(food_particle.getPosition(), this->getPosition());
+			if (foodDist < smellMaxDist) //upon food detection
+			{
+				m_target_food = &food_particle;
+				m_lock_position = food_particle.getPosition();
+				m_currentState = State::GO2FOOD;
+			}
+		}
+
+		target_loc = this->computeMovement(dt);
+		this->issue_move_command(target_loc);
+		this->secretPheromon(dt, pheromat_system_ptr, -2.0f);
+
+	}
+	break;
+
+	case State::GO2FOOD:
+	{
+		this->transformAnt(dt);
+		float collectDist = 20.0f;
+		float foodDist = dist2Vec(this->getPosition(), m_lock_position);
+
+		if (foodDist < collectDist)
+		{
+			m_currentState = State::COLLECTING;
+			m_foodCollectTimer.restart();
+		}
+		else
+			issue_move_command(m_lock_position);
+
+		break;
+	}
+	case State::COLLECTING:
+	{
+		float collectTime = 2.0f; //time taken to collect food
+		timer = m_foodCollectTimer.getElapsedTime();
+		if (m_target_food->depleted)
+		{
+			m_currentState = State::FORAGING;
+			break;
+		}
+		if (timer.asSeconds() > collectTime)
+		{
+			int harvest_amount{ 1 };
+			m_gather_amount = m_target_food->Harvested(harvest_amount);
+			m_currentState = State::GATHERING;
+
+			m_food_scrap.setFillColor(sf::Color::Green); //make food scrap visible
+			m_food_scrap.setOutlineColor(sf::Color::Black);
+			sf::Vector2f currentFaceVector = this->getFaceVector();
+			m_food_scrap.setPosition(this->getPosition() + scalarProduct(currentFaceVector, 12));
+
+		}
+	}
+	break;
+
+
+	case State::GATHERING:
+	{
+		float enterHoleDist = 3.0;
+		float maxVisualDist = 80.0; //ant visual range
+		float choleDist = dist2Vec(this->getPosition(), m_chole_pos);
+
+		//check distance to hole
+		if (choleDist < maxVisualDist) //check if colony hole is within visual range
+		{
+			if (choleDist > enterHoleDist) //check if ant can enter hole yet
+				target_loc = m_chole_pos;
+			else
+			{
+				m_currentState = State::ENTERHOLE;
+				m_enterHoleTimer.restart();
+			}
+		}
+		else
+			target_loc = this->computeMovement(dt);
+
+		this->issue_move_command(target_loc);
+		this->transformAnt(dt);
+		this->secretPheromon(dt, pheromat_system_ptr, 50);
+
+		//update food scrap
+		m_food_scrap.setFillColor(sf::Color::Green);
+		sf::Vector2f currentFaceVector = this->getFaceVector();
+		sf::Vector2f scrap_pos = this->getPosition() + scalarProduct(currentFaceVector, 12);
+		m_food_scrap.setPosition(scrap_pos);
+	}
+	break;
+
+	case State::ENTERHOLE:
+	{
+		m_gather_amount = 0; //reset carry amount
+		m_colony->addResourceAmount(m_gather_amount);
+		m_visible = false; //hide ant
+		float holeTime{ 3.0 };
+		timer = m_enterHoleTimer.getElapsedTime();
+		if (timer.asSeconds() > holeTime)
+		{
+			float currentRotation = this->getRotation();
+			this->setRotation(currentRotation - 180.0f);
+			m_visible = true;
+			m_currentState = State::FORAGING;
+			m_food_scrap.setFillColor(sf::Color::Transparent); //remove food scrap
+		}
+	}
+	break;
+	case State::IDLE:
+		break;
+	default:
+		break;
+	}
+}
+void Ant::secretPheromon(float dt, PheroMatrix* pheroMat, float add_strength)
+{
+	m_internal_clock = m_internal_clock + dt;
+	if (m_internal_clock >= m_pheromon_period) //secret pheromone at every fixed interval
+	{
+		pheroMat->addStrength(this->getPosition(), add_strength);
+		m_internal_clock = 0.0f; //restart clock
+	}
+}
+void Ant::drawSensoryCircle(sf::RenderWindow &window)
+{
+	for (unsigned int i = 0; i < (m_sensorNumPerSide * 2 + 1); i++)
+	{
+		window.draw(SensoryTracker[i]);
+		SensoryTracker[i].setFillColor(sf::Color::Red);
+	}
+}
+
+void Ant::transformAnt(float dt)
 {
 	// translation
 
@@ -118,50 +252,131 @@ void Ant::updateMovement(float dt)
 			rotate(rotateDirection * m_rotatespeed * dt);
 		//std::cout << getRotation() << "\n";
 	}
-	//sensory
-	//m_sensory_input.updateFaceIndex(this->getRotation());
-	//m_sensory_input.updateWeight(path_blck_ptr);
-
-	//int target_circle_indx = computeMoveTarget();
-	//sf::Vector2f targetLoc =  m_sensory_input.m_sensory_circle[target_circle_indx].getPosition();
-	//issue_move_command(targetLoc);
 
 	//update animation
 	ant_animation.Update(dt);
 	this->setTextureRect(ant_animation.m_uvRect);
 }
-
-void Ant::secretPheromon2(float dt, PheroMatrix* pheroMat, float add_strength)
+sf::Vector2f Ant::computeMovement(float dt)
 {
-	m_internal_clock = m_internal_clock + dt;
-	if (m_internal_clock >= m_pheromon_period) //secret pheromone at every fixed interval
+
+	// Ant has a number of "sensors" at the front of the head.
+	// Each sensor "detects" pheromone level and objects, stored as sensor "weight"
+	// At each time step, ant will select 1 sensor to move to based on "weight"
+	// The higher the weight, the higher the probabilty.
+	// Hence, the ant movement is probabilistic in nature
+
+	// Probability of moving to sensor[i], 
+	//         P(i) = C[i] / sum(C)  ,
+	// where C:weight.
+
+
+	//////////////////////////////////////
+	//==========INITILIZATION===========//
+
+	sf::Vector2u currentTilePos = pheromat_system_ptr->mapCoordsToPos(this->getPosition()); // compute ant current tile position
+	sf::Vector2f currentFaceVector = this->getFaceVector();
+	sf::Vector2f normalFaceVector(sf::Vector2f(-currentFaceVector.y, currentFaceVector.x));  	//normal vector
+	sf::Vector2f vec2Chole = m_chole_pos - this->getPosition(); //vector from ant to colony hole
+
+	//====calculate sensor positions===//
+
+	m_sensorPosition[0] = this->getPosition() + scalarProduct(currentFaceVector, 15); //the middle sensor
+
+	//right side
+	for (unsigned int i = 0; i < m_sensorNumPerSide; i++)
+		m_sensorPosition[i + 1] = m_sensorPosition[0] + scalarProduct(normalFaceVector, (i + 1) * m_sensorSpacing);
+
+	//left side
+	for (unsigned int i = 0; i < m_sensorNumPerSide; i++)
+		m_sensorPosition[m_sensorNumPerSide + 1 + i] = m_sensorPosition[0] + scalarProduct(-normalFaceVector, (i + 1) * m_sensorSpacing);
+
+	//m_sensorPosition[m_sensorNumPerSide] = m_sensorPosition[m_sensorNumPerSide] + scalarProduct(-currentFaceVector, 7) + scalarProduct(-normalFaceVector,5);
+	//m_sensorPosition[m_sensorNumPerSide * 2] = m_sensorPosition[m_sensorNumPerSide * 2] + scalarProduct(-currentFaceVector, 7) + scalarProduct(normalFaceVector, 5);
+
+
+	///////////////////////////////////////////////////
+	//============COMPUTE SENSOR WEIGHT =============//
+
+	float sum_C{ 0.0f };
+
+	for (unsigned int i = 0; i < m_sensorNumTotal; i++)
 	{
-		pheroMat->addStrength(this->getPosition(), add_strength);
-		m_internal_clock = 0.0f; //restart clock
+		SensoryTracker[i].setPosition(m_sensorPosition[i]);
+		
+		// all the terms and coefficients
+
+		float Ci = 0.0f; // sensor weight
+		float baseWeight = 5.0f; // base weight
+		float choleCoeff = 1.0f; // angle to colony hole
+		float pheroStr = pheromat_system_ptr->getStrengh(m_sensorPosition[i]); //pheromone strength
+		float pheroCoeff; // sensitivity towards pheromone
+		float terrainCoeff = m_terrain_system_ptr->getTerrainCoeff(m_sensorPosition[i]); // 1 = moveable space, 0 = blocked by terrain
+		float collisionCoeff = m_terrain_system_ptr->getCollisionCoeff(m_sensorPosition[i]); // 1 = moveable space, 0 = blocked by other ants
+		float priorityCoeff = 1.0f; // fine tune sensor weight
+
+		//--------------------WEIGHT EQUATION (FORAGING) ------------------------
+
+		if (m_currentState == State::FORAGING)
+		{
+			pheroCoeff = 2.0f;
+			baseWeight = 5.0f;
+			if (i == 0)
+				priorityCoeff = 5.0f; // increase middle sensor weight
+
+			Ci = priorityCoeff * collisionCoeff * terrainCoeff *(baseWeight + pheroCoeff * pheroStr );
+
+		}
+		//---------------------------------------------------------------------------
+		//--------------------WEIGHT EQUATION ( GATHERING ) -------------------------
+
+		if (m_currentState == State::GATHERING)
+		{
+			pheroCoeff = 1.0f;
+			baseWeight = 2.0f;
+			sf::Vector2f sensor_vec = m_sensorPosition[i] - this->getPosition(); // vector of ant to sensor
+			choleCoeff = abs(vectorAngle(sensor_vec, vec2Chole) / constants::pi * 180.0f);
+
+
+			Ci = 5* choleCoeff + priorityCoeff * collisionCoeff * terrainCoeff * (baseWeight + pheroCoeff * pheroStr);
+
+		}
+
+		//--------------------------------------------------------------------------------
+
+		m_Ci[i] = static_cast<int>(Ci);
+		sum_C += m_Ci[i];
 	}
+
+
+	///////////////////////////////////////////////////
+	///-------------COMPUTE MOVEMENT-------------//////
+
+	//if front are unmovable, ant turns back
+	if (sum_C <= 0.1f)
+		return this->getPosition() + scalarProduct(-currentFaceVector, 20);
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::discrete_distribution<> weight_PDistrib(m_Ci.begin(), m_Ci.end()); // create discrete probability distribution
+	int moveToIndex = weight_PDistrib(gen); // decide next move based on probability distribution
+
+	SensoryTracker[moveToIndex].setFillColor(sf::Color::Green); // selected sensor lights up
+
+	return m_sensorPosition[moveToIndex];
 }
 
-
+//Setter and Getters
 void Ant::switchActivity(Activity new_activity)
 {
 	m_activity = new_activity;
 }
-
-void Ant::drawSensoryCircle(sf::RenderWindow &window)
-{
-	for (unsigned int i = 0; i < (m_sensorNumPerSide * 2 + 1); i++)
-	{
-		window.draw(SensoryTracker[i]);
-		SensoryTracker[i].setFillColor(sf::Color::Red);
-	}
-}
-
-//Setter and Getters
 Activity Ant::getActivity()
 {
 	//std::cout<< "Current activity: "<< printActivity(m_activity) <<"\n";//debug message
 	return m_activity;
 }
+
 float Ant::getMoveSpeed()
 {
 	return this->m_movespeed;
@@ -180,203 +395,13 @@ void Ant::rememberFoodLoc(sf::Vector2f food_loc)
 {
 	m_food_pos = food_loc;
 }
-
 sf::Vector2f Ant::recallFoodLoc()
 {
 	return m_food_pos;
 }
-
 void Ant::forgetFoodLoc()
 {
 	m_food_pos = {};
-}
-
-sf::Vector2f Ant::computeMovementMatrix(float dt)
-{
-	/////////////////////////////////
-	/////////////////////////////////
-	//=====define sensor area======//
-	sf::Vector2u currentTilePos = pheromat_system_ptr->mapCoordsToPos(this->getPosition()); // compute ant current tile position
-	sf::Vector2f currentFaceVector = this->getFaceVector();
-	sf::Vector2f normalFaceVector(sf::Vector2f(-currentFaceVector.y, currentFaceVector.x));  	//normal vector
-
-	//sensors settings
-	unsigned const int sensorTotalNum = m_sensorNumPerSide * 2 + 1; //total sensor number
-
-	///////////////////////////////////
-	//====define sensor positions===//
-
-	//the middle sensor
-	m_sensorPosition[0] = this->getPosition() + scalarProduct(currentFaceVector, 15);
-
-	//right side
-	for (unsigned int i = 0; i < m_sensorNumPerSide; i++)
-		m_sensorPosition[i + 1] = m_sensorPosition[0] + scalarProduct(normalFaceVector, (i + 1) * m_sensorSpacing);
-	//left side
-	for (unsigned int i = 0; i < m_sensorNumPerSide; i++)
-		m_sensorPosition[m_sensorNumPerSide + 1 + i] = m_sensorPosition[0] + scalarProduct(-normalFaceVector, (i + 1) * m_sensorSpacing);
-
-	//m_sensorPosition[m_sensorNumPerSide] = m_sensorPosition[m_sensorNumPerSide] + scalarProduct(-currentFaceVector, 7) + scalarProduct(-normalFaceVector,5);
-	//m_sensorPosition[m_sensorNumPerSide * 2] = m_sensorPosition[m_sensorNumPerSide * 2] + scalarProduct(-currentFaceVector, 7) + scalarProduct(normalFaceVector, 5);
-
-
-	/////////////////////////////////////////////////
-	//============COMPUTE PROBABILITY=============//
-	//probability of moving to circle i, P(i) = Ci / sum(C)
-	float sum_C{ 0.0f };
-
-	// populate all Ci
-	for (unsigned int i = 0; i < sensorTotalNum; i++)
-	{
-		SensoryTracker[i].setPosition(m_sensorPosition[i]);
-		m_Ci[i] = 5.0f;
-		m_Ci[i] += pheromat_system_ptr->getStrengh(m_sensorPosition[i]) * 2.0f;
-		m_Ci[i] *= m_terrain_system_ptr->getTerrainCoeff(m_sensorPosition[i]) * m_terrain_system_ptr->getCollisionCoeff(m_sensorPosition[i]);;
-
-		if (m_Ci[i] <= 0.1f)
-			SensoryTracker[i].setFillColor(sf::Color::Black);
-		sum_C += m_Ci[i];
-	}
-
-	//if no pheromone detected, make all circle equal chance
-	if (sum_C <= 0.1f)
-		return this->getPosition() + scalarProduct(-currentFaceVector, 20);
-
-	/////////////////////////////////////////////
-	//-------------DECISION MAKING-------------//
-
-	//create discrete distribution
-	m_Ci[0] *= 5.0f;
-
-	std::vector<int> Ci;
-	Ci.resize(sensorTotalNum);
-	for (unsigned int i = 0; i < sensorTotalNum; i++)
-		Ci[i] = static_cast<int> (m_Ci[i]);
-
-	std::discrete_distribution<> str_PDistrib(Ci.begin(), Ci.end());
-
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	int moveToIndex = str_PDistrib(gen);
-	SensoryTracker[moveToIndex].setFillColor(sf::Color::Green);
-
-	return m_sensorPosition[moveToIndex];
-}
-sf::Vector2f Ant::computeMovement_colony(float dt, sf::Vector2f colony_hole_pos)
-{
-	/////////////////////////////////
-	/////////////////////////////////
-	//=====define sensor area======//
-	sf::Vector2u currentTilePos = pheromat_system_ptr->mapCoordsToPos(this->getPosition()); // compute ant current tile position
-
-	// facing vector
-	sf::Vector2f currentFaceVector = this->getFaceVector();
-	sf::Vector2f normalFaceVector(sf::Vector2f(-currentFaceVector.y, currentFaceVector.x));  	//normal vector
-	sf::Vector2f vec2Chole = colony_hole_pos - this->getPosition(); //vector from ant to colony hole
-
-	//sensors settings
-	unsigned const int sensorTotalNum = m_sensorNumPerSide * 2 + 1; //total sensor number
-
-	///////////////////////////////////
-	//====define sensor positions===//
-
-	//the middle sensor
-	m_sensorPosition[0] = this->getPosition() + scalarProduct(currentFaceVector, 15);
-
-	//right side
-	for (unsigned int i = 0; i < m_sensorNumPerSide; i++)
-		m_sensorPosition[i + 1] = m_sensorPosition[0] + scalarProduct(normalFaceVector, (i + 1) * m_sensorSpacing);
-	//left side
-	for (unsigned int i = 0; i < m_sensorNumPerSide; i++)
-		m_sensorPosition[m_sensorNumPerSide + 1 + i] = m_sensorPosition[0] + scalarProduct(-normalFaceVector, (i + 1) * m_sensorSpacing);
-
-	for (unsigned int i = 0; i < sensorTotalNum; i++)
-		SensoryTracker[i].setPosition(m_sensorPosition[i]);
-
-	/////////////////////////////////////////////////
-	//============COMPUTE PROBABILITY=============//
-	//probability of moving to circle i, P(i) = Ci / sum(C)
-	float sum_C{ 0.0 };
-	//	for (int i = 0; i < sensorTotalNum; i++)
-	//		m_Ci[i] = 1.0;
-
-		// populate all Ci
-	for (unsigned int i = 0; i < sensorTotalNum; i++)
-	{
-		m_Ci[i] = 5.0f;
-		m_Ci[i] += pheromat_system_ptr->getStrengh(m_sensorPosition[i]) * 0.2f;
-		sf::Vector2f sensor_vec = m_sensorPosition[i] - this->getPosition();
-		float angle2Chole = vectorAngle(sensor_vec, vec2Chole);
-		angle2Chole = abs(angle2Chole / constants::pi * 180.0f)*2.0f;
-		float distanceCoeef = dist2Vec(m_chole_pos, this->getPosition()); //the closer to colony hole, the more accurate it is
-
-		m_Ci[i] *= angle2Chole * distanceCoeef * m_terrain_system_ptr->getTerrainCoeff(m_sensorPosition[i])
-			* m_terrain_system_ptr->getCollisionCoeff(m_sensorPosition[i]);
-
-		//if (collision_check)
-		//{
-		//	//for (auto& pb : *pblocker_systm_ptr)
-		//	//{
-		//	//	if (pb.getGlobalBounds().contains(m_sensorPosition[i]))
-		//	//	{
-		//	//		m_Ci[i] = 0;
-		//	//		//std::cout << "collide!\n";
-
-		//	//	}
-		//	//}
-
-
-
-		//	//only check the one foraging
-		//	/*if (m_activity == Activity::FORAGING)
-		//	{
-		//		for (auto& fs : *food_system_ptr)
-		//			if (fs.getGlobalBounds().contains(m_sensorPosition[i]))
-		//			{
-		//				m_state.CARRYING = true;
-		//				m_activity = Activity::GATHERING;
-		//				rememberFoodLoc(fs.getPosition());
-		//				std::cout << "Food found!!\n";
-
-		//			}
-		//	}*/
-		//}
-
-		for (auto& foodp : *food_system_ptr)
-		{
-			if (foodp.getGlobalBounds().contains(m_sensorPosition[i]))
-			{
-				m_Ci[i] = 0;
-				//std::cout << "collide!\n";
-
-			}
-		}
-		sum_C += m_Ci[i];
-	}
-
-	////if all route are blocked, turn back
-	if (sum_C <= constants::near_zero)
-		return this->getPosition() + scalarProduct(-currentFaceVector, 20);
-
-	/////////////////////////////////////////////
-	//-------------DECISION MAKING-------------//
-
-	//create discrete distribution
-	//m_Ci[0] *= 5;
-
-	std::vector<int> Ci;
-	Ci.resize(sensorTotalNum);
-	for (unsigned int i = 0; i < sensorTotalNum; i++)
-		Ci[i] = static_cast<int> (m_Ci[i]);
-
-	std::discrete_distribution<> str_PDistrib(Ci.begin(), Ci.end());
-
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	int moveToIndex = str_PDistrib(gen);
-	SensoryTracker[moveToIndex].setFillColor(sf::Color::Green);
-
-	return m_sensorPosition[moveToIndex];
 }
 
 sf::Vector2f Ant::getFaceVector()
@@ -396,7 +421,6 @@ sf::Vector2f Ant::getFaceVector()
 	return currentFaceVector;
 }
 
-
 sf::Vector2f Ant::recallCholePos()
 {
 	return m_chole_pos;
@@ -406,131 +430,3 @@ void Ant::rememberCholePos(sf::Vector2f chole_pos)
 	m_chole_pos = chole_pos;
 }
 
-
-void Ant::Update(float dt)
-{
-	sf::Vector2f target_loc;
-	sf::Time timer;
-
-	switch (m_currentState)
-	{
-	case State::FORAGING:
-	{
-		this->updateMovement(dt);
-		float smellMaxDist = 100.0f;
-		for (auto& food_particle : *food_system_ptr)
-		{
-			float foodDist = dist2Vec(food_particle.getPosition(), this->getPosition());
-			if (foodDist < smellMaxDist) //upon food detection
-			{
-				m_target_food = &food_particle;
-				m_lock_position = food_particle.getPosition();
-				m_currentState = State::GO2FOOD;
-			}
-		}
-		//this->m_terrain_system_ptr->clearAntCoeff(*this);
-		target_loc = this->computeMovementMatrix(dt);
-		this->issue_move_command(target_loc);
-		this->secretPheromon2(dt, pheromat_system_ptr, -2.0f);
-		//this->m_terrain_system_ptr->updateAntCoeff(*this, 0);
-	}
-	break;
-	
-	case State::GO2FOOD:
-	{
-		this->updateMovement(dt);
-		float collectDist = 20.0f;
-		float foodDist = dist2Vec(this->getPosition(), m_lock_position);
-		if (foodDist < collectDist)
-		{
-			m_currentState = State::COLLECTING;
-			m_foodCollectTimer.restart();
-		}
-		else
-			//this->m_terrain_system_ptr->clearAntCoeff(*this);
-			issue_move_command(m_lock_position);
-			//this->m_terrain_system_ptr->updateAntCoeff(*this, 0);
-	}
-	break;
-
-	case State::COLLECTING:
-	{
-		float collectTime = 2.0f; //time taken to collect food
-		timer = m_foodCollectTimer.getElapsedTime();
-		if (m_target_food->depleted)
-		{
-			m_currentState = State::FORAGING;
-			break;
-		}
-		if (timer.asSeconds() > collectTime)
-		{
-			int harvest_amount{ 1 };
-			gather_amount = m_target_food->Harvested(harvest_amount);
-			m_currentState = State::GATHERING;
-
-			m_food_scrap.setFillColor(sf::Color::Green); //make food scrap visible
-			m_food_scrap.setOutlineColor(sf::Color::Black);
-			sf::Vector2f currentFaceVector = this->getFaceVector();
-			m_food_scrap.setPosition(this->getPosition() + scalarProduct(currentFaceVector, 12));
-
-		}
-	}
-	break;
-
-
-	case State::GATHERING:
-	{
-		float enterHoleDist = 3.0;
-		float maxVisualDist = 80.0; //ant visual range
-		float choleDist = dist2Vec(this->getPosition(), m_chole_pos);
-
-		//check distance to hole
-		if (choleDist < maxVisualDist) //check if colony hole is within visual range
-		{
-			if (choleDist > enterHoleDist) //check if ant can enter hole yet
-				target_loc = m_chole_pos;
-			else
-			{
-				m_currentState = State::ENTERHOLE;
-				m_enterHoleTimer.restart();
-			}
-		}
-		else
-			target_loc = this->computeMovement_colony(dt, m_chole_pos);
-		//this->m_terrain_system_ptr->clearAntCoeff(*this);
-		this->issue_move_command(target_loc);
-		this->updateMovement(dt);
-		//this->m_terrain_system_ptr->updateAntCoeff(*this, 0);
-		this->secretPheromon2(dt, pheromat_system_ptr, 50);
-
-		//update food scrap
-		m_food_scrap.setFillColor(sf::Color::Green);
-		sf::Vector2f currentFaceVector = this->getFaceVector();
-		sf::Vector2f scrap_pos = this->getPosition() + scalarProduct(currentFaceVector, 12);
-		m_food_scrap.setPosition(scrap_pos);
-	}
-	break;
-
-	case State::ENTERHOLE:
-	{
-		m_colony->addResourceAmount(gather_amount);
-		gather_amount = 0; //reset carry amount
-		m_visible = false; //hide ant
-		float holeTime{ 3.0 };
-		timer = m_enterHoleTimer.getElapsedTime();
-		if (timer.asSeconds() > holeTime)
-		{
-			float currentRotation = this->getRotation();
-			this->setRotation(currentRotation - 180.0f);
-			m_visible = true;
-			m_currentState = State::FORAGING;
-			m_food_scrap.setFillColor(sf::Color::Transparent); //remove food scrap
-		}
-	}
-	break;
-	case State::IDLE:
-		break;
-	default:
-		break;
-	}
-}

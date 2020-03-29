@@ -13,14 +13,28 @@
 #include "Food.h"
 #include "Astar.h"
 #include "Terrain.h"
+#include "GameStateMachine.h"
 
+#include <algorithm>
 #include<fstream>
 #include<SFML/Graphics.hpp>
 #include<SFML/Window.hpp>
 #include<SFML/OpenGL.hpp>
 #include<iostream>
 #include<SFML/System/Vector2.hpp>
-#include<string>
+#include<string >
+
+namespace GameSetting
+{
+	extern const int windowHeight{ 800 };
+	extern const int windowWidth{ 800 };
+
+	extern const float worldWidth{ 1800.0f };
+	extern const float worldHeight{ 1200.0f };
+
+	extern const float GAMESPEED{ 1.0 }; //normal speed = 1.0
+	extern const int FRAMERATE{ 60 }; //default = 60fps
+}
 
 
 int main()
@@ -29,15 +43,20 @@ int main()
 	//////////////////////////////////////////////////////////////////////////////
 	////////////////////////////   INITIALIZATION   //////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
+
+	//=========WINDOW AND VIEW===============//
 	sf::RenderWindow window(sf::VideoMode(GameSetting::windowWidth, GameSetting::windowHeight), "Colony");
 	window.setFramerateLimit(GameSetting::FRAMERATE);
 	sf::View view(sf::FloatRect(0.0f, 0.0f, float(GameSetting::windowWidth), float(GameSetting::windowHeight)));
+	view.setViewport(sf::FloatRect(0.0f, 0.0f, 1.0f, 1.0f));
 	float zoom_factor{1.0};
-	sf::Clock gameclock;
 
+	//========TIMER===============//
+	sf::Clock gameclock;
 	float timeElapsed{ 0.0f };
 	float randTime{ 0.0f };
-	std::string USER_INPUT;
+
+
 	//=====LOAD COMMAND LIST=======//
 	std::string line;
 	std::string command_list;
@@ -54,6 +73,7 @@ int main()
 	}
 
 	//===============temporary UI settings =================//
+	std::string USER_INPUT;
 	bool block_placement{ false };
 	MOUSE_INPUT_MODE placement_mode{ MOUSE_INPUT_MODE::EMPTY };
 	bool show_pheromone{ true };
@@ -78,7 +98,7 @@ int main()
 	stat_resource.setFillColor(sf::Color::Black);
 	stat_resource.setCharacterSize(25);
 	stat_resource.setPosition(float(GameSetting::windowWidth - 200), float(10));
-
+	 
 
 	//////////////////////////////////////////////////////////////////////////////
 	////////////////////////////   WORLD CREATION   //////////////////////////////
@@ -89,7 +109,7 @@ int main()
 	PheroMatrix PheroTiles;
 
 	//======CREATE PHEROMONE SYSTEM 2=====
-	PheroTiles.initPheroMatrix(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(300, 300)); //gamesetting: 1200x1200	
+	PheroTiles.initPheroMatrix(GameSetting::worldWidth, GameSetting::worldHeight, sf::Vector2u(300, 300)); //gamesetting: 1200x1200	
 
 	//======LOAD TEXTURE========//
 	sf::Texture skin;
@@ -102,34 +122,25 @@ int main()
 	drawMapBoundary(&pblock_system);
 
 	//=======TERRAIN SYSTEM========//
-	Terrain terrain_system(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(300,300));
+	Terrain terrain_system(GameSetting::worldWidth, GameSetting::worldHeight, sf::Vector2u(300,300));
 	for (auto &pb : pblock_system)
 		terrain_system.updateCoeff(pb);
 
 	//========LOAD SPATIAL PARTITIONING OBJECT===========//
 	SpatialPartition partition;
-	partition.initSpatialPartition(GameSetting::windowWidth, GameSetting::windowHeight, sf::Vector2u(20, 20));
+	partition.initSpatialPartition(GameSetting::worldWidth, GameSetting::worldHeight, sf::Vector2u(20, 20));
 	partition.updateCheckIndex(&pblock_system);
 
 	//========LOAD A* SYSTEM===========//
 	
 	Astar AstarSystem;
 	sf::Vector2u res(40, 40);
-	AstarSystem.initAstar(GameSetting::windowWidth, GameSetting::windowHeight, res, true);
+	AstarSystem.initAstar(GameSetting::worldWidth, GameSetting::worldHeight, res, true);
 	AstarSystem.updateObstacleNode(&pblock_system);
-	Node* startNode = &AstarSystem.m_Nodes[0];
-	Node* goalNode = &AstarSystem.m_Nodes[res.x * res.y - 1];
-	std::list <Node*> shortestPath;
-	shortestPath = AstarSystem.computePath(startNode, goalNode);
-
-	Astar TilePath_Rough;
-	sf::Vector2u res2(40, 40);
-	TilePath_Rough.initAstar(GameSetting::windowWidth, GameSetting::windowHeight, res2, true);
-	TilePath_Rough.updateObstacleNode(&pblock_system);
-	Node* start_node_rough = &TilePath_Rough.m_Nodes[0];
-	Node* goal_node_rough = &TilePath_Rough.m_Nodes[res2.x * res2.y - 1];
-	std::list <Node*> shortestPath_rough;	
-	shortestPath_rough = TilePath_Rough.computePath(start_node_rough, goal_node_rough);
+	sf::Vector2f startPos(0.0, 0.0);
+	sf::Vector2f endPos(1000.0f, 1000.0f);
+	std::vector < sf::Vector2f > shortestPath;
+	shortestPath = AstarSystem.computePath(startPos, endPos);
 
 	//======FOOD OBJECT=============//
 	std::vector<Food> food_system;
@@ -147,11 +158,9 @@ int main()
 	Chole.setPosition(sf::Vector2f(1000, 1000));
 	Colony1.setCholePos(Chole.getPosition());
 
-
 	////=====WINDOW=======//
 	while (window.isOpen())
 	{
-
 		//////////////////////////////////////////////////////////////////////////////
 		////////////////////////////   USER INTERFACE   //////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////
@@ -218,15 +227,15 @@ int main()
 			//===============ADD ANT================//
 			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Q))
 			{
-				float rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowWidth));
-				float rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowHeight));
+				float rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::worldWidth));
+				float rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::worldHeight));
 
 				////recalculate for padding
 
-				while ((rand_x < 20.0) | (rand_x > (GameSetting::windowWidth - 20.0)))
-					rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowWidth));
+				while ((rand_x < 20.0) | (rand_x > (GameSetting::worldWidth - 20.0)))
+					rand_x = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::worldWidth));
 				while ((rand_y < 20.0) | (rand_y > (GameSetting::windowHeight - 20.0)))
-					rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::windowHeight));
+					rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::worldHeight));
 
 				Colony1.addAnt(sf::Vector2f(rand_x, rand_y));
 				std::cout << "pressed Q!\n";
@@ -292,8 +301,7 @@ int main()
 					terrain_system.updateCoeff(pblock_system.back());
 					partition.updateCheckIndex(&pblock_system);
 					AstarSystem.updateObstacleNode(&pblock_system);
-					TilePath_Rough.updateObstacleNode(&pblock_system);
-					shortestPath = AstarSystem.computePath(startNode, goalNode);
+					shortestPath = AstarSystem.computePath(startPos, endPos);
 					break;
 
 				case MOUSE_INPUT_MODE::FOOD:
@@ -312,18 +320,18 @@ int main()
 					//for (auto path : foodpath)
 					//	printf("[%f][%f]\n", path.x, path.y);
 					break;
-				//case MOUSE_INPUT_MODE::S_NODE:
-				//	startNode = AstarSystem.getNode(worldPos);
-				//	//printf("start = [%d][%d]\n", startNode->x, startNode->y);
-				//	shortestPath = AstarSystem.computePath(startNode, goalNode);
-				//	placement_mode = MOUSE_INPUT_MODE::EMPTY;
-				//	break;
-				//case MOUSE_INPUT_MODE::E_NODE:
-				//	goalNode = AstarSystem.getNode(worldPos);
-				//	shortestPath = AstarSystem.computePath(startNode, goalNode);
-				//	//printf("goal = [%d][%d]\n", goalNode->x, goalNode->y);
-				//	placement_mode = MOUSE_INPUT_MODE::EMPTY;
-				//	break;
+				case MOUSE_INPUT_MODE::S_NODE:
+					startPos = worldPos;
+					//printf("start = [%d][%d]\n", startNode->x, startNode->y);
+					shortestPath = AstarSystem.computePath(startPos, endPos);
+					placement_mode = MOUSE_INPUT_MODE::EMPTY;
+					break;
+				case MOUSE_INPUT_MODE::E_NODE:
+					endPos = worldPos;
+					shortestPath = AstarSystem.computePath(startPos, endPos);
+					//printf("goal = [%d][%d]\n", goalNode->x, goalNode->y);
+					placement_mode = MOUSE_INPUT_MODE::EMPTY;
+					break;
 				default:
 					break;
 				}
@@ -337,13 +345,20 @@ int main()
 
 			}
 
-			//======ZOOM======//
+			//===============MOUSE SCROLL================//
 			if (event.type == sf::Event::MouseWheelMoved)
 			{
 				float maxZoom = 2.0;
 				float minZoom = -2.0;
 				
-				zoom_factor += static_cast<float>(event.mouseWheel.delta) * -0.2f;
+				zoom_factor += static_cast<float>(event.mouseWheel.delta) * -0.05f;
+				if (event.mouseWheel.delta > 0)
+				{
+					sf::Vector2f centerView = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+					centerView.x = clamp(centerView.x, 0.0f, GameSetting::worldWidth);
+					centerView.y = clamp(centerView.y, 0.0f, GameSetting::worldHeight);
+					view.setCenter(centerView);
+				}
 			}
 
 			//===============STRING COMMAND================//
@@ -377,7 +392,6 @@ int main()
 
 					case TEXT_COMMAND::CREATE_ANT:
 						std::cout << "COMMAND: Create ant";
-						//Colony1.addAnt(sf::Vector2f(GameSetting::windowWidth / 2, GameSetting::windowHeight/ 2));
 						break;
 
 					case TEXT_COMMAND::HELP:
@@ -410,7 +424,6 @@ int main()
 		//////////////////////////////////////////////////////////////////////////////
 
 	//==========update frame==============//
-
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
 		if (timeElapsed > 1 / 20.0f)
 			timeElapsed = 1 / 20.0f;
@@ -437,6 +450,7 @@ int main()
 
 
 		//=========clear window =================//
+
 		view.zoom(zoom_factor);
 		window.setView(view);
 		window.clear(sf::Color::White);
@@ -449,7 +463,7 @@ int main()
 			window.draw(PheroTiles);
 		Colony1.drawColony(window);
 		window.draw(Chole);
-		//window.draw(terrain_system);
+		//window.draw(terrain_system); 
 		//window.draw(AstarSystem);
 		//window.draw(TilePath_Rough);
 		for (auto& n : pblock_system)
@@ -465,7 +479,6 @@ int main()
 
 		window.display();
 
-		sf::View currentView = window.getView();
 		randTime += timeElapsed;
 
 	}
