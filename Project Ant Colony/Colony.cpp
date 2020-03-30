@@ -19,6 +19,7 @@ void Colony::addAnt(sf::Vector2f spawn_loc)
 {
 	//Ant dummyAnt(pblocker_systm_ptr);
 	//dummyAnt.initAnt(0.1, spawn_loc, ant_skin);
+
 	this->AntContainer.push_back(Ant());
 	Ant& newant = AntContainer[AntContainer.size() - 1];
 	newant.initAnt(0.1f, spawn_loc, ant_skin, pblocker_systm_ptr, food_systm_ptr, m_pheromatrix_ptr);
@@ -27,6 +28,30 @@ void Colony::addAnt(sf::Vector2f spawn_loc)
 	newant.setRotation(init_faceangle);
 	newant.rememberCholePos(m_chole_position);
 	newant.m_colony = this;
+	newant.m_terrain_system_ptr = this->m_terrain_system_ptr;
+	//printf("Ant created! face angle = %f\n", init_faceangle);
+	ant_num++;
+	std::cout << "Ant added! Size = " << ant_num << std::endl;
+}
+
+
+//NEW VERSION
+void Colony::addAnt2(sf::Vector2f spawn_loc)
+{
+	//Ant dummyAnt(pblocker_systm_ptr);
+	//dummyAnt.initAnt(0.1, spawn_loc, ant_skin);
+
+	this->AntContainer.push_back(Ant());
+	Ant& newant = AntContainer[AntContainer.size() - 1];
+	newant.initAnt(0.1f, spawn_loc, ant_skin, pblocker_systm_ptr, food_systm_ptr, m_pheromatrix_ptr);
+	float init_faceangle{ static_cast<float>(rand() / (RAND_MAX / 360)) };
+	newant.setRotation(init_faceangle);
+	newant.setRotation(init_faceangle);
+	newant.rememberCholePos(m_chole_position);
+	newant.m_colony = this;
+
+	newant.m_foodSystem_ptr = this->m_foodSystm_ptr;
+	newant.m_PblockerSystem_ptr = this->m_PBlockerSystm_ptr;
 	newant.m_terrain_system_ptr = this->m_terrain_system_ptr;
 	//printf("Ant created! face angle = %f\n", init_faceangle);
 	ant_num++;
@@ -47,6 +72,23 @@ void Colony::initColony(std::vector<PathBlocker>* ptr_copy, sf::Texture* ant_ski
 	std::cout << "size of Ant = " << AntContainer.size() << "\n";
 	this->m_totalResource = 0;
 }
+
+//NEW VERSION
+void Colony::initColony(PathBlockSystem* pb_system, sf::Texture* skin, PheroMatrix* phero_system,
+	SpatialPartition* partition_system, FoodSystem* food_system, Terrain* terrain_system)
+{
+	this->AntContainer.reserve(1000);
+	this->m_PBlockerSystm_ptr = pb_system;
+	this->m_terrain_system_ptr = terrain_system;
+	this->m_foodSystm_ptr = food_system;
+	this->ant_skin = skin;
+	this->m_partition_ptr = partition_system;
+	this->m_pheromatrix_ptr = phero_system;
+	std::cout << "Colony Initialized with pblock add:" << pblocker_systm_ptr << "\n";
+	std::cout << "size of Ant = " << AntContainer.size() << "\n";
+	this->m_totalResource = 0;
+}
+
 
 void Colony::drawColony(sf::RenderWindow &window)
 {

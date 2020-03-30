@@ -1,12 +1,16 @@
 #pragma once
 
+#include "GameSetting.h"
 #include "Ant.h"
 #include "Colony.h"
 #include "Astar.h"
 #include "Food.h"
-#include "PathBlocker.h"
+#include "PathBlockSystem.h"
+#include "drawMapBoundary.h"
 #include "PheroMatrix.h"
 #include "Terrain.h"
+#include "FoodSystem.h"
+#include "ResourceManager.h"
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
@@ -20,14 +24,19 @@ class World
 public:
 	World();
 	~World();
-	void createWorld(sf::Window &window);
+	void createWorld();
+	void importResource(ResourceManager* resource);
+	void Update(float dt);
+	void Draw(sf::RenderWindow& window);
 
 
-private:
-	static PheroMatrix* pheroSystem_ptr;
-	static Terrain* terrainSystem_ptr;
-	static std::vector<PathBlocker*> pathBlockerSystem_ptr;
-	static std::vector<Food*> foodSystem_ptr;
-	static Colony* colonySystem_ptr;
+public:
+
+	ResourceManager* GameResource;
+	FoodSystem* foodSystem_ptr;
+	SpatialPartition* spatialPartition_ptr;
+	PheroMatrix* pheroSystem_ptr;
+	Terrain* terrainSystem_ptr;
+	PathBlockSystem* pblockerSystem_ptr;
+	Colony* colonySystem_ptr;
 };
-

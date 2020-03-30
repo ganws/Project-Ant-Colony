@@ -2,6 +2,7 @@
 
 #include "PathBlocker.h"
 #include "Ant.h"
+#include "PBunit.h"
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -19,9 +20,12 @@ public:
 	Terrain(float game_width, float game_height, sf::Vector2u resolution);
 	~Terrain();
 	void colorPath(int u, int v, sf::Color color_input, unsigned int alpha_input=255);
+
 	sf::Vector2u mapIndx2Coord(const int indx);
 	sf::Vector2u mapCoordsToPos(sf::Vector2f worldPos);
-	void updateCoeff(PathBlocker& new_pathblocker);
+
+	void updateCoeff(PathBlocker& new_pathblocker); // old pblockers
+	void updateCoeff(PBunit& new_pathblocker); //new pblockers
 
 	void updateAntCoeff(Ant& ant, int coeff);
 	void clearAntCoeff(Ant& ant);

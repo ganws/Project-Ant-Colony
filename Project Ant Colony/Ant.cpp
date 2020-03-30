@@ -40,7 +40,7 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture* skin, std::vec
 	//environment pointers
 	pblocker_systm_ptr = arg_pblock_system; //path block system
 	food_system_ptr = arg_food_system; //food system
-	pheromat_system_ptr = arg_pheromat_system; //pheromone matrix
+	m_pheroSystem_ptr = arg_pheromat_system; //pheromone matrix
 
 	//Animation
 	m_currentState = State::FORAGING;
@@ -94,7 +94,7 @@ void Ant::Update(float dt)
 
 		target_loc = this->computeMovement(dt);
 		this->issue_move_command(target_loc);
-		this->secretPheromon(dt, pheromat_system_ptr, -2.0f);
+		this->secretPheromon(dt, m_pheroSystem_ptr, -2.0f);
 
 	}
 	break;
@@ -162,7 +162,7 @@ void Ant::Update(float dt)
 
 		this->issue_move_command(target_loc);
 		this->transformAnt(dt);
-		this->secretPheromon(dt, pheromat_system_ptr, 50);
+		this->secretPheromon(dt, m_pheroSystem_ptr, 50);
 
 		//update food scrap
 		m_food_scrap.setFillColor(sf::Color::Green);
@@ -274,7 +274,7 @@ sf::Vector2f Ant::computeMovement(float dt)
 	//////////////////////////////////////
 	//==========INITILIZATION===========//
 
-	sf::Vector2u currentTilePos = pheromat_system_ptr->mapCoordsToPos(this->getPosition()); // compute ant current tile position
+	sf::Vector2u currentTilePos = m_pheroSystem_ptr->mapCoordsToPos(this->getPosition()); // compute ant current tile position
 	sf::Vector2f currentFaceVector = this->getFaceVector();
 	sf::Vector2f normalFaceVector(sf::Vector2f(-currentFaceVector.y, currentFaceVector.x));  	//normal vector
 	sf::Vector2f vec2Chole = m_chole_pos - this->getPosition(); //vector from ant to colony hole
@@ -309,7 +309,7 @@ sf::Vector2f Ant::computeMovement(float dt)
 		float Ci = 0.0f; // sensor weight
 		float baseWeight = 5.0f; // base weight
 		float choleCoeff = 1.0f; // angle to colony hole
-		float pheroStr = pheromat_system_ptr->getStrengh(m_sensorPosition[i]); //pheromone strength
+		float pheroStr = m_pheroSystem_ptr->getStrengh(m_sensorPosition[i]); //pheromone strength
 		float pheroCoeff; // sensitivity towards pheromone
 		float terrainCoeff = m_terrain_system_ptr->getTerrainCoeff(m_sensorPosition[i]); // 1 = moveable space, 0 = blocked by terrain
 		float collisionCoeff = m_terrain_system_ptr->getCollisionCoeff(m_sensorPosition[i]); // 1 = moveable space, 0 = blocked by other ants

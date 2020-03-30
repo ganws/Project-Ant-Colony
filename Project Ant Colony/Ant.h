@@ -9,6 +9,8 @@
 #include "Food.h"
 #include "Colony.h"
 #include "Terrain.h"
+#include "FoodSystem.h"
+#include "PathBlockSystem.h"
 
 #include<random>
 #include<math.h>
@@ -47,7 +49,7 @@ public:
 
 	//constructor, destructor
 	Ant();
-	Ant(const Ant& obj);
+	Ant(const Ant& copyant);
 	~Ant();
 
 	void Update(float dt);
@@ -130,8 +132,11 @@ private:
 	//environment pointers
 	std::vector<PathBlocker>* pblocker_systm_ptr{ nullptr };
 	std::vector<Food>* food_system_ptr{ nullptr };
-	PheroMatrix* pheromat_system_ptr{ nullptr };
+	
+	FoodSystem* m_foodSystem_ptr{ nullptr };
+	PathBlockSystem* m_PblockerSystem_ptr{ nullptr };
 	Food* m_target_food{ nullptr };
+	PheroMatrix* m_pheroSystem_ptr{ nullptr };
 	Terrain* m_terrain_system_ptr{ nullptr };
 
 	friend class Colony;

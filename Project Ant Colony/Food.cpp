@@ -9,6 +9,15 @@ Food::Food(sf::Vector2f spwn_loc, sf::Color color, float radius)
 	m_amount = 100;
 }
 
+Food::Food(const Food& copyfood)
+{
+	this->setFillColor(copyfood.getFillColor());
+	this->setRadius(copyfood.getRadius());
+	this->setOrigin(this->getRadius(), this->getRadius());
+	this->setPosition(copyfood.getPosition());
+	this->m_amount = copyfood.m_amount;
+}
+
 int Food::Harvested(int harvest_amount)
 {
 	m_amount = m_amount - harvest_amount;

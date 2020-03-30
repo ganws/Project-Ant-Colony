@@ -28,7 +28,7 @@ private:
 	sf::Vector2u m_resolution; //num of tiles *
 	sf::VertexArray m_tilevertices; //to visualize the strength of each tile
 
-public:
+private:
 
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
 	{
