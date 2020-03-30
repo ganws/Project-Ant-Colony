@@ -1,7 +1,7 @@
 #pragma once
 #include<SFML/Graphics.hpp>
 
-class PathBlocker: public sf::RectangleShape
+class PathBlocker : public sf::RectangleShape
 {
 public:
 	PathBlocker(); //default constructor

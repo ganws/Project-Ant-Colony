@@ -40,7 +40,44 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture* skin, std::vec
 	//environment pointers
 	pblocker_systm_ptr = arg_pblock_system; //path block system
 	food_system_ptr = arg_food_system; //food system
-	pheromat_system_ptr = arg_pheromat_system; //pheromone matrix
+	m_pheroSystem_ptr = arg_pheromat_system; //pheromone matrix
+
+	//Animation
+	m_currentState = State::FORAGING;
+	ant_animation.InitAnimation(skin, sf::Vector2u(8, 8), 62, 0.01f);
+}
+
+//NEW VERSION
+void Ant::initAnt2(float size, sf::Vector2f init_pos, sf::Texture* skin)
+{
+	//sensor init
+	m_sensorNumTotal = m_sensorNumPerSide * 2 + 1; //total sensor numbers, include the middle sensor
+	m_sensorPosition.resize(m_sensorNumTotal);//sensor position array
+	m_Ci.resize(m_sensorNumTotal); //weight array
+	SensoryTracker.resize(m_sensorNumTotal); //sensor ball array
+	for (auto& s : SensoryTracker)
+	{
+		s.setFillColor(sf::Color::Red);
+		s.setRadius(3);
+		s.setOrigin(s.getRadius(), s.getRadius());
+	}
+
+	//food scrap init
+	m_food_scrap.setFillColor(sf::Color::Transparent);
+	m_food_scrap.setRadius(3);
+	m_food_scrap.setOrigin(m_food_scrap.getRadius(), m_food_scrap.getRadius());
+
+	//Texture and size
+	int skin_length = skin->getSize().x / 8; // length of single frame from animation
+	int skin_height = skin->getSize().y / 8; // height of single frame from animation
+	this->setTexture(*skin);
+	setTextureRect(sf::IntRect(0, 0, skin_length, skin_height));
+	setOrigin(static_cast<float> (skin_length / 2), static_cast<float> (skin_height / 2));
+	setScale(size, size);
+	setPosition(init_pos);
+	switchActivity(Activity::FORAGING);
+	m_size.x = this->getTextureRect().width * size;
+	m_size.y = this->getTextureRect().height * size;
 
 	//Animation
 	m_currentState = State::FORAGING;
@@ -50,7 +87,7 @@ void Ant::initAnt(float size, sf::Vector2f init_pos, sf::Texture* skin, std::vec
 void Ant::issue_move_command(sf::Vector2f coordinate)
 {
 	m_targetCoord = coordinate; //coordinate vector
-	sf::Vector2f moveVector = getPosition() - coordinate; //move vector
+	sf::Vector2f moveVector = this->getPosition() - coordinate; //move vector
 
 	sf::Vector2f yUnitVector{ 0.0f, -1.0f };
 	sf::Vector2f xUnitVector{ 1.0f, 0.0f };
@@ -81,20 +118,20 @@ void Ant::Update(float dt)
 		this->transformAnt(dt);
 		float smellMaxDist = 100.0f; //how far can the ant smell
 
-		for (auto& food_particle : *food_system_ptr)
+		for (auto &food_particle : m_foodSystem_ptr->FoodContainer)
 		{
-			float foodDist = dist2Vec(food_particle.getPosition(), this->getPosition());
-			if (foodDist < smellMaxDist) //upon food detection
+			float foodDist = dist2Vec(food_particle->getPosition(), this->getPosition());
+			if (foodDist < smellMaxDist && !food_particle->depleted) //upon food detection
 			{
-				m_target_food = &food_particle;
-				m_lock_position = food_particle.getPosition();
+				m_target_food = food_particle;
+				m_lock_position = food_particle->getPosition();
 				m_currentState = State::GO2FOOD;
 			}
 		}
 
 		target_loc = this->computeMovement(dt);
 		this->issue_move_command(target_loc);
-		this->secretPheromon(dt, pheromat_system_ptr, -2.0f);
+		this->secretPheromon(dt, m_pheroSystem_ptr, -2.0f);
 
 	}
 	break;
@@ -162,7 +199,7 @@ void Ant::Update(float dt)
 
 		this->issue_move_command(target_loc);
 		this->transformAnt(dt);
-		this->secretPheromon(dt, pheromat_system_ptr, 50);
+		this->secretPheromon(dt, m_pheroSystem_ptr, 50);
 
 		//update food scrap
 		m_food_scrap.setFillColor(sf::Color::Green);
@@ -174,8 +211,8 @@ void Ant::Update(float dt)
 
 	case State::ENTERHOLE:
 	{
-		m_gather_amount = 0; //reset carry amount
 		m_colony->addResourceAmount(m_gather_amount);
+		m_gather_amount = 0; //reset carry amount
 		m_visible = false; //hide ant
 		float holeTime{ 3.0 };
 		timer = m_enterHoleTimer.getElapsedTime();
@@ -274,7 +311,7 @@ sf::Vector2f Ant::computeMovement(float dt)
 	//////////////////////////////////////
 	//==========INITILIZATION===========//
 
-	sf::Vector2u currentTilePos = pheromat_system_ptr->mapCoordsToPos(this->getPosition()); // compute ant current tile position
+	sf::Vector2u currentTilePos = m_pheroSystem_ptr->mapCoordsToPos(this->getPosition()); // compute ant current tile position
 	sf::Vector2f currentFaceVector = this->getFaceVector();
 	sf::Vector2f normalFaceVector(sf::Vector2f(-currentFaceVector.y, currentFaceVector.x));  	//normal vector
 	sf::Vector2f vec2Chole = m_chole_pos - this->getPosition(); //vector from ant to colony hole
@@ -309,7 +346,7 @@ sf::Vector2f Ant::computeMovement(float dt)
 		float Ci = 0.0f; // sensor weight
 		float baseWeight = 5.0f; // base weight
 		float choleCoeff = 1.0f; // angle to colony hole
-		float pheroStr = pheromat_system_ptr->getStrengh(m_sensorPosition[i]); //pheromone strength
+		float pheroStr = m_pheroSystem_ptr->getStrengh(m_sensorPosition[i]); //pheromone strength
 		float pheroCoeff; // sensitivity towards pheromone
 		float terrainCoeff = m_terrain_system_ptr->getTerrainCoeff(m_sensorPosition[i]); // 1 = moveable space, 0 = blocked by terrain
 		float collisionCoeff = m_terrain_system_ptr->getCollisionCoeff(m_sensorPosition[i]); // 1 = moveable space, 0 = blocked by other ants
@@ -322,7 +359,7 @@ sf::Vector2f Ant::computeMovement(float dt)
 			pheroCoeff = 2.0f;
 			baseWeight = 5.0f;
 			if (i == 0)
-				priorityCoeff = 5.0f; // increase middle sensor weight
+				priorityCoeff = 2.0f; // increase middle sensor weight
 
 			Ci = priorityCoeff * collisionCoeff * terrainCoeff *(baseWeight + pheroCoeff * pheroStr );
 
@@ -338,7 +375,7 @@ sf::Vector2f Ant::computeMovement(float dt)
 			choleCoeff = abs(vectorAngle(sensor_vec, vec2Chole) / constants::pi * 180.0f);
 
 
-			Ci = 5* choleCoeff + priorityCoeff * collisionCoeff * terrainCoeff * (baseWeight + pheroCoeff * pheroStr);
+			Ci = 5* choleCoeff * priorityCoeff * collisionCoeff * terrainCoeff * (baseWeight + pheroCoeff * pheroStr);
 
 		}
 
@@ -358,6 +395,8 @@ sf::Vector2f Ant::computeMovement(float dt)
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
+
+
 	std::discrete_distribution<> weight_PDistrib(m_Ci.begin(), m_Ci.end()); // create discrete probability distribution
 	int moveToIndex = weight_PDistrib(gen); // decide next move based on probability distribution
 

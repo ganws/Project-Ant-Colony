@@ -9,6 +9,8 @@
 #include "Food.h"
 #include "Colony.h"
 #include "Terrain.h"
+#include "FoodSystem.h"
+#include "PathBlockSystem.h"
 
 #include<random>
 #include<math.h>
@@ -47,12 +49,13 @@ public:
 
 	//constructor, destructor
 	Ant();
-	Ant(const Ant& obj);
+	Ant(const Ant& copyant);
 	~Ant();
 
 	void Update(float dt);
 
 	void initAnt(float size, sf::Vector2f init_pos, sf::Texture* texture, std::vector<PathBlocker>* arg_pblock_system, std::vector<Food>* arg_food_system, PheroMatrix* pheromat_sytm);
+	void initAnt2(float size, sf::Vector2f init_pos, sf::Texture* texture);
 	void transformAnt(float dt);
 
 	// pheromones interaction
@@ -84,7 +87,6 @@ public:
 
 	// compute movement
 	sf::Vector2f computeMovement(float dt); //foraging movement
-	sf::Vector2f computeMovement_colony(float dt, sf::Vector2f colony_hole_pos); //find way back to colony
 
 private:
 
@@ -130,8 +132,11 @@ private:
 	//environment pointers
 	std::vector<PathBlocker>* pblocker_systm_ptr{ nullptr };
 	std::vector<Food>* food_system_ptr{ nullptr };
-	PheroMatrix* pheromat_system_ptr{ nullptr };
+	
+	FoodSystem* m_foodSystem_ptr{ nullptr };
+	PathBlockSystem* m_PblockerSystem_ptr{ nullptr };
 	Food* m_target_food{ nullptr };
+	PheroMatrix* m_pheroSystem_ptr{ nullptr };
 	Terrain* m_terrain_system_ptr{ nullptr };
 
 	friend class Colony;

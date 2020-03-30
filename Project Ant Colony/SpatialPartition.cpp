@@ -1,4 +1,6 @@
 #include "SpatialPartition.h"
+SpatialPartition::SpatialPartition() {};
+SpatialPartition::~SpatialPartition() {};
 
 void SpatialPartition::initSpatialPartition(int world_width, int world_height, sf::Vector2u resolution_param)
 {
@@ -67,6 +69,35 @@ void SpatialPartition::clearPartition()
 void SpatialPartition::updateCheckIndex(std::vector<PathBlocker>* pbsystem)
 {
 	for (auto& n : *pbsystem)
+	{
+		float length = n.getSize().x;
+		sf::Vector2f center = n.getPosition();
+
+		//calculate all 4 corner positions
+		sf::Vector2f cornersPos[4]{};
+		cornersPos[0] = center + sf::Vector2f(-length / 2, -length / 2); //top left
+		cornersPos[1] = center + sf::Vector2f(length / 2, -length / 2); //top right
+		cornersPos[2] = center + sf::Vector2f(length / 2, length / 2); //bottom right
+		cornersPos[3] = center + sf::Vector2f(-length / 2, length / 2); //bottom left
+
+		//check all 4 corners 
+		for (auto& n : cornersPos)
+		{
+			sf::Vector2u partitionPos;
+			partitionPos = mapCoordsToPos(n);
+			checkIndex.push_back(partitionPos.x + partitionPos.y * m_resolution.x);
+		}
+	}
+
+	//remove duplicated indeces
+	std::sort(checkIndex.begin(), checkIndex.end());
+	checkIndex.erase(std::unique(checkIndex.begin(), checkIndex.end()), checkIndex.end());
+	//std::cout << "Check index size: " << checkIndex.size() << "\n";
+}
+
+void SpatialPartition::updateCheckIndex(PathBlockSystem* pbsystem_ptr)
+{
+	for (auto& n : pbsystem_ptr->m_PBcontainer)
 	{
 		float length = n.getSize().x;
 		sf::Vector2f center = n.getPosition();

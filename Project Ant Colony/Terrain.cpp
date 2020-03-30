@@ -87,6 +87,23 @@ void Terrain::updateCoeff(PathBlocker& new_pathblocker)
 		}
 }
 
+void Terrain::updateCoeff(PBunit& new_pathblocker)
+{
+
+	sf::Vector2f pb_size = new_pathblocker.getSize();
+
+	//get 4 corners in tilePos
+	sf::Vector2u topleft = mapCoordsToPos(new_pathblocker.getPosition() + sf::Vector2f(-pb_size.x / 2, -pb_size.y / 2));
+	sf::Vector2u botright = mapCoordsToPos(new_pathblocker.getPosition() + sf::Vector2f(pb_size.x / 2, pb_size.y / 2));
+
+	for (int x = topleft.x; x <= botright.x; x++)
+		for (int y = topleft.y; y <= botright.y; y++)
+		{
+			m_pathCoeff[x + y * m_resolution.x] = 0;
+			colorPath(x, y, sf::Color::Red, 255);
+		}
+}
+
 void Terrain::updateAntCoeff(Ant& ant, int coeff)
 {
 

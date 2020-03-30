@@ -23,6 +23,7 @@
     <ClCompile Include="Ant.cpp" />
     <ClCompile Include="AntState.cpp" />
     <ClCompile Include="Astar.cpp" />
+    <ClCompile Include="FoodSystem.cpp" />
     <ClCompile Include="GameStateMachine.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Colony.cpp" />
@@ -31,9 +32,12 @@
     <ClCompile Include="Food.cpp" />
     <ClCompile Include="GameSetting.cpp" />
     <ClCompile Include="Hashit.cpp" />
+    <ClCompile Include="PathBlockSystem.cpp" />
     <ClCompile Include="PathBlocker.cpp" />
+    <ClCompile Include="PBunit.cpp" />
     <ClCompile Include="PheroMatrix.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SpatialPartition.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="VectorFunction.cpp" />
@@ -44,6 +48,7 @@
     <ClInclude Include="Ant.h" />
     <ClInclude Include="AntState.h" />
     <ClInclude Include="Astar.h" />
+    <ClInclude Include="FoodSystem.h" />
     <ClInclude Include="GameStateMachine.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Colony.h" />
@@ -52,8 +57,11 @@
     <ClInclude Include="Food.h" />
     <ClInclude Include="GameSetting.h" />
     <ClInclude Include="Hashit.h" />
+    <ClInclude Include="PathBlockSystem.h" />
     <ClInclude Include="PathBlocker.h" />
+    <ClInclude Include="PBunit.h" />
     <ClInclude Include="PheroMatrix.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SpatialPartition.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="VectorFunction.h" />

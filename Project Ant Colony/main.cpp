@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ResourceManager.h"
+#include "World.h"
 #include "GameSetting.h"
 #include "Ant.h"
 #include "VectorFunction.h"
@@ -14,6 +16,8 @@
 #include "Astar.h"
 #include "Terrain.h"
 #include "GameStateMachine.h"
+#include "PathBlockSystem.h"
+#include "FoodSystem.h"
 
 #include <algorithm>
 #include<fstream>
@@ -26,8 +30,8 @@
 
 namespace GameSetting
 {
-	extern const int windowHeight{ 800 };
-	extern const int windowWidth{ 800 };
+	extern const int windowHeight{ 1000 };
+	extern const int windowWidth{ 1000 };
 
 	extern const float worldWidth{ 1800.0f };
 	extern const float worldHeight{ 1200.0f };
@@ -39,7 +43,6 @@ namespace GameSetting
 
 int main()
 {
-
 	//////////////////////////////////////////////////////////////////////////////
 	////////////////////////////   INITIALIZATION   //////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
@@ -55,7 +58,6 @@ int main()
 	sf::Clock gameclock;
 	float timeElapsed{ 0.0f };
 	float randTime{ 0.0f };
-
 
 	//=====LOAD COMMAND LIST=======//
 	std::string line;
@@ -103,12 +105,17 @@ int main()
 	//////////////////////////////////////////////////////////////////////////////
 	////////////////////////////   WORLD CREATION   //////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
+	
+	ResourceManager GameResource;
+	GameResource.LoadResource();
+
+	World WorldObject;
+	WorldObject.importResource(&GameResource);
+	WorldObject.createWorld();
+
 
 	//======CREATE PHEROMONE SYSTEM=====
-	//PheromoneSystem pheromones(10000); //fixed 10k particles. beyond that game will crash
 	PheroMatrix PheroTiles;
-
-	//======CREATE PHEROMONE SYSTEM 2=====
 	PheroTiles.initPheroMatrix(GameSetting::worldWidth, GameSetting::worldHeight, sf::Vector2u(300, 300)); //gamesetting: 1200x1200	
 
 	//======LOAD TEXTURE========//
@@ -116,47 +123,6 @@ int main()
 	std::cout << &skin << "\n";
 	if (!skin.loadFromFile("walk.png"))
 		std::cout << "unable to load skin. \n";
-
-	//======PATH BLOCKERS========//
-	std::vector<PathBlocker> pblock_system;
-	drawMapBoundary(&pblock_system);
-
-	//=======TERRAIN SYSTEM========//
-	Terrain terrain_system(GameSetting::worldWidth, GameSetting::worldHeight, sf::Vector2u(300,300));
-	for (auto &pb : pblock_system)
-		terrain_system.updateCoeff(pb);
-
-	//========LOAD SPATIAL PARTITIONING OBJECT===========//
-	SpatialPartition partition;
-	partition.initSpatialPartition(GameSetting::worldWidth, GameSetting::worldHeight, sf::Vector2u(20, 20));
-	partition.updateCheckIndex(&pblock_system);
-
-	//========LOAD A* SYSTEM===========//
-	
-	Astar AstarSystem;
-	sf::Vector2u res(40, 40);
-	AstarSystem.initAstar(GameSetting::worldWidth, GameSetting::worldHeight, res, true);
-	AstarSystem.updateObstacleNode(&pblock_system);
-	sf::Vector2f startPos(0.0, 0.0);
-	sf::Vector2f endPos(1000.0f, 1000.0f);
-	std::vector < sf::Vector2f > shortestPath;
-	shortestPath = AstarSystem.computePath(startPos, endPos);
-
-	//======FOOD OBJECT=============//
-	std::vector<Food> food_system;
-	std::vector<sf::Vector2f> foodpath;
-	Food* newfood_ptr{nullptr};
-	//======CREATE COLONY==========//
-	Colony Colony1;
-	Colony1.initColony(&pblock_system, &skin, &PheroTiles, &partition, &food_system, &terrain_system);
-
-	//======COLONY HOLE===========//
-	sf::CircleShape Chole;
-	Chole.setFillColor(sf::Color::Black);
-	Chole.setRadius(10.0);
-	Chole.setOrigin(Chole.getRadius(), Chole.getRadius());
-	Chole.setPosition(sf::Vector2f(1000, 1000));
-	Colony1.setCholePos(Chole.getPosition());
 
 	////=====WINDOW=======//
 	while (window.isOpen())
@@ -220,7 +186,7 @@ int main()
 			//======TOGGLE SENSOR VISUAL==============//
 			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::S))
 			{
-				Colony1.dispSensor = !Colony1.dispSensor;
+				WorldObject.colonySystem_ptr->dispSensor = !WorldObject.colonySystem_ptr->dispSensor;
 				std::cout << "SENSOR VISUAL: " << show_sensor << "\n";
 			}
 
@@ -237,7 +203,7 @@ int main()
 				while ((rand_y < 20.0) | (rand_y > (GameSetting::windowHeight - 20.0)))
 					rand_y = static_cast<float>(rand() / static_cast<float>(RAND_MAX / GameSetting::worldHeight));
 
-				Colony1.addAnt(sf::Vector2f(rand_x, rand_y));
+				//Colony1.addAnt(sf::Vector2f(rand_x, rand_y));
 				std::cout << "pressed Q!\n";
 			}
 
@@ -289,49 +255,40 @@ int main()
 					break;
 
 				case MOUSE_INPUT_MODE::ADDANT:
-					Colony1.addAnt(worldPos);
+					//Colony1.addAnt(worldPos);
+					WorldObject.colonySystem_ptr->addAnt2(worldPos);
 
 					break;
 				case MOUSE_INPUT_MODE::PHEROMONE:
-					PheroTiles.addStrength(worldPos, 100.0f);
+					//PheroTiles.addStrength(worldPos, 100.0f);
+					WorldObject.pheroSystem_ptr->addStrength(worldPos, 100.0f);
 					break;
 
 				case MOUSE_INPUT_MODE::PBLOCK:
-					pblock_system.push_back(PathBlocker(worldPos, sf::Color::Blue, 30.0f));
-					terrain_system.updateCoeff(pblock_system.back());
-					partition.updateCheckIndex(&pblock_system);
-					AstarSystem.updateObstacleNode(&pblock_system);
-					shortestPath = AstarSystem.computePath(startPos, endPos);
+					WorldObject.pblockerSystem_ptr->addPBunit(sf::VertexArray(sf::Quads, 4), worldPos);
+					WorldObject.terrainSystem_ptr->updateCoeff(WorldObject.pblockerSystem_ptr->m_PBcontainer.back());
 					break;
 
 				case MOUSE_INPUT_MODE::FOOD:
-					food_system.push_back(Food(worldPos, sf::Color::Green, 10));
-					partition.addCheckIndex(food_system[food_system.size() - 1]);
-					
-					//compute path to colony hole
-					//newfood_ptr = &food_system.back();
-					//start_node_rough = TilePath_Rough.getNode(newfood_ptr->getPosition()); //node position of food
-					//goal_node_rough = TilePath_Rough.getNode(Chole.getPosition()); //node position of colony
-					//shortestPath_rough = TilePath_Rough.computePath(start_node_rough, goal_node_rough); //compute shortest path in Node position
-					//foodpath = TilePath_Rough.getPathFromNode(shortestPath_rough);
-					//newfood_ptr->storePath(foodpath);
-					//
-					//std::cout << "Food to colony path = \n";
-					//for (auto path : foodpath)
-					//	printf("[%f][%f]\n", path.x, path.y);
+					WorldObject.foodSystem_ptr->addFood(worldPos);
+					//partition.addCheckIndex(food_system[food_system.size() - 1]);
+					//food_system.push_back(Food(worldPos, sf::Color::Green, 10));
 					break;
+
 				case MOUSE_INPUT_MODE::S_NODE:
-					startPos = worldPos;
+					//startPos = worldPos;
 					//printf("start = [%d][%d]\n", startNode->x, startNode->y);
-					shortestPath = AstarSystem.computePath(startPos, endPos);
+					//shortestPath = AstarSystem.computePath(startPos, endPos);
 					placement_mode = MOUSE_INPUT_MODE::EMPTY;
 					break;
+
 				case MOUSE_INPUT_MODE::E_NODE:
-					endPos = worldPos;
-					shortestPath = AstarSystem.computePath(startPos, endPos);
+					//endPos = worldPos;
+					//shortestPath = AstarSystem.computePath(startPos, endPos);
 					//printf("goal = [%d][%d]\n", goalNode->x, goalNode->y);
 					placement_mode = MOUSE_INPUT_MODE::EMPTY;
 					break;
+
 				default:
 					break;
 				}
@@ -399,11 +356,11 @@ int main()
 						break;
 
 					case TEXT_COMMAND::ANTSIZE:
-						std::cout << Colony1.getAntNum() << "\n";
+						//std::cout << Colony1.getAntNum() << "\n";
 						break;
 
 					case TEXT_COMMAND::ANTSKIN:
-						std::cout << Colony1.ant_skin << "\n";
+						//std::cout << Colony1.ant_skin << "\n";
 						break;
 					case TEXT_COMMAND::CLEARPHERO:
 						PheroTiles.resetPheromone();
@@ -423,59 +380,37 @@ int main()
 		/////////////////////////	     END OF UI      //////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////
 
-	//==========update frame==============//
+		// update
+
 		timeElapsed = gameclock.restart().asSeconds() * GameSetting::GAMESPEED;
 		if (timeElapsed > 1 / 20.0f)
 			timeElapsed = 1 / 20.0f;
-		Colony1.computeAntMove(timeElapsed);
-		PheroTiles.pheromoneDecay(timeElapsed);
-		//pheromones.decay(timeElapsed);
 
-		//spatial partitioning update
-		partition.clearPartition(); //clear all partition of ant pointers
+		WorldObject.Update(timeElapsed); //update world
 
-		for (int i = 0; i < Colony1.getAntNum(); i++)
-		{
-			Colony1.AntContainer[i].collision_check = false;
-			partition.updatePartition(&Colony1.AntContainer[i], Colony1.AntContainer[i].getPosition()); //add ant pointer to partition
-		}
-
-		//game stat update
-		partition.updateAntStatus(); //update ant collision check bool status
-		std::string colonysize = "Colony size: " + std::to_string(Colony1.getAntNum());
+		////game stat update
+		Colony& colony = *WorldObject.colonySystem_ptr;
+		std::string colonysize = "Colony size: " + std::to_string(colony.getAntNum());
 		stat_antnum.setString(colonysize);
 
-		std::string resourcesize = "Resource: " + std::to_string(Colony1.getResourceAmount());
+		std::string resourcesize = "Resource: " + std::to_string(colony.getResourceAmount());
 		stat_resource.setString(resourcesize);
 
-
-		//=========clear window =================//
-
+		//zoom
 		view.zoom(zoom_factor);
 		window.setView(view);
-		window.clear(sf::Color::White);
 		zoom_factor = 1;
 
-		//========= draw window =================//
+
+		// clear window 
+
+		window.clear(sf::Color::White);
+
+		// draw window
+
+		WorldObject.Draw(window);
 		window.draw(stat_antnum);
 		window.draw(stat_resource);
-		if (show_pheromone) 
-			window.draw(PheroTiles);
-		Colony1.drawColony(window);
-		window.draw(Chole);
-		//window.draw(terrain_system); 
-		//window.draw(AstarSystem);
-		//window.draw(TilePath_Rough);
-		for (auto& n : pblock_system)
-			window.draw(n);
-		for (int i = 0; i < food_system.size(); i++)
-		{
-			window.draw(food_system[i]);
-			if (food_system[i].depleted)
-			{
-				food_system.erase(food_system.begin()+i);
-			}
-		}
 
 		window.display();
 

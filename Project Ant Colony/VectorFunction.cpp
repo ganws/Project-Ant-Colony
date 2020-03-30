@@ -26,9 +26,8 @@ float vectorAngle(sf::Vector2f v1, sf::Vector2f v2)
 		cosA = -0.9999f;
 		std::cout << "-NAN DETECTED and CORRECTED \n";
 	}
-
-	if (isnan(acos(-cosA)))
-		return acos(-cosA);
+	
+	return acos(-cosA);
 }
 
 sf::Vector2f unitVector(sf::Vector2f v)
