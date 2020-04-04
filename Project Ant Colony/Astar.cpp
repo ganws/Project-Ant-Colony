@@ -19,7 +19,7 @@ void Astar::initAstar(int world_width, int world_height, sf::Vector2u resolution
 		m_num_neighbour = 8;
 
 	//update all node coordinate
-	m_Nodes.resize(m_totalNode);
+	tileset.resize(m_totalNode);
 	//for (int i = 0; i < m_totalNode; i++)
 		//m_Nodes.push_back(Node());
 	this->updateNeighbourNode();
@@ -37,33 +37,33 @@ void Astar::updateNeighbourNode()
 	for (int j = 0; j < m_resolution.y; j++)
 		for (int i = 0; i < m_resolution.x; i++)
 		{
-			Node* currentNode = &m_Nodes[i + j * m_resolution.x];
+			Node* currentNode = &tileset[i + j * m_resolution.x];
 			currentNode->x = i;
 			currentNode->y = j;
 
 			if (j > 0)
-				currentNode->neighbors.push_back(&m_Nodes[i + (j - 1) * m_resolution.x]); //north
+				currentNode->neighbors.push_back(&tileset[i + (j - 1) * m_resolution.x]); //north
 
 			if (i < m_resolution.x - 1)
-				currentNode->neighbors.push_back(&m_Nodes[(i + 1) + j * m_resolution.x]); //east
+				currentNode->neighbors.push_back(&tileset[(i + 1) + j * m_resolution.x]); //east
 
 			if (j < m_resolution.y - 1)
-				currentNode->neighbors.push_back(&m_Nodes[i + (j + 1) * m_resolution.x]); //south
+				currentNode->neighbors.push_back(&tileset[i + (j + 1) * m_resolution.x]); //south
 
 			if (i > 0)
-				currentNode->neighbors.push_back(&m_Nodes[(i - 1) + j * m_resolution.x]); //wst
+				currentNode->neighbors.push_back(&tileset[(i - 1) + j * m_resolution.x]); //wst
 
 			if (m_diagonal && j > 0 && i < m_resolution.x - 1)
-				currentNode->neighbors.push_back(&m_Nodes[(i + 1) + (j - 1) * m_resolution.x]); //north east
+				currentNode->neighbors.push_back(&tileset[(i + 1) + (j - 1) * m_resolution.x]); //north east
 
 			if (m_diagonal && j > 0 && i > 0)
-				currentNode->neighbors.push_back(&m_Nodes[(i - 1) + (j - 1) * m_resolution.x]); //north west
+				currentNode->neighbors.push_back(&tileset[(i - 1) + (j - 1) * m_resolution.x]); //north west
 
 			if (m_diagonal && j < m_resolution.y - 1 && i < m_resolution.x - 1)
-				currentNode->neighbors.push_back(&m_Nodes[(i + 1) + (j + 1) * m_resolution.x]); //south east
+				currentNode->neighbors.push_back(&tileset[(i + 1) + (j + 1) * m_resolution.x]); //south east
 
 			if (m_diagonal && j < m_resolution.y - 1 && i >0)
-				currentNode->neighbors.push_back(&m_Nodes[(i - 1) + (j + 1) * m_resolution.x]); //south west
+				currentNode->neighbors.push_back(&tileset[(i - 1) + (j + 1) * m_resolution.x]); //south west
 
 			currentNode->num_neighbour = currentNode->neighbors.size();
 
@@ -109,7 +109,7 @@ float Astar::computeHeuristic(Node* a, Node* b)
 std::list<Node*> Astar::computeNodePath(Node* start_node, Node* goal_node)
 {
 	//reset all nodes
-	for (auto& n : m_Nodes)
+	for (auto& n : tileset)
 	{
 		n.globalCost = INFINITY;
 		n.localCost = INFINITY;
@@ -232,7 +232,7 @@ void Astar::updateObstacleNode(std::vector<PathBlocker>* pbsytem)
 		{
 			sf::Vector2u nodePos;
 			nodePos = mapCoordsToPos(n);
-			m_Nodes[nodePos.x + nodePos.y * m_resolution.x].obstacle = true;
+			tileset[nodePos.x + nodePos.y * m_resolution.x].obstacle = true;
 		}
 	}
 }
@@ -285,7 +285,7 @@ void Astar::colorNode(Node* target_node, sf::Color color_input)
 Node* Astar::getNode(sf::Vector2f worldPos)
 {
 	sf::Vector2u tmp = mapCoordsToPos(worldPos);
-	return &m_Nodes[tmp.x + tmp.y * m_resolution.x];
+	return &tileset[tmp.x + tmp.y * m_resolution.x];
 }
 
 std::vector<sf::Vector2f> Astar::getPathFromNode(std::list<Node*> path)

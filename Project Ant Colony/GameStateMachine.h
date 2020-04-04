@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/System.hpp>
-#include <SFML/Window.hpp>
+#include <SFML/Window.hpp>	
 
 class GameStateMachine
 {
@@ -15,14 +15,23 @@ public:
 
 private:
 
+	// trype of 
+	enum class OBJECT_TO_PLACE
+	{
+		ANT,
+		PHEROMONE,
+		PBLOCK,
+		FOOD
+	};
+
 	enum class GAMESTAT
 	{
 		MENU,
 		OBJ_PLACEMENT,
 		PAUSE,
 		BACK,
-		QUIT,
+		QUIT
 	};
 
+	std::list<GAMESTAT> stateStack;
 };
-

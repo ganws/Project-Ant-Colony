@@ -40,12 +40,31 @@ namespace GameSetting
 	extern const int FRAMERATE{ 60 }; //default = 60fps
 }
 
+enum class ObjectType
+{
+	NONE,
+	ANT,
+	PHEROMONE,
+	PBLOCK,
+	FOOD
+};
+
+enum class Gamestate
+{
+
+
+};
+
 
 int main()
 {
 	//////////////////////////////////////////////////////////////////////////////
 	////////////////////////////   INITIALIZATION   //////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
+
+	//=========GUI================
+	Gamestate currentState{};
+	ObjectType object2bPlaced{ ObjectType::NONE };
 
 	//=========WINDOW AND VIEW===============//
 	sf::RenderWindow window(sf::VideoMode(GameSetting::windowWidth, GameSetting::windowHeight), "Colony");
@@ -106,25 +125,18 @@ int main()
 	////////////////////////////   WORLD CREATION   //////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////
 	
+	// An object that stores pointers of all resources like textures and sounds
 	ResourceManager GameResource;
 	GameResource.LoadResource();
 
+	// World is an class that store pointers of other system class like pheromones, colony, etc
+
 	World WorldObject;
-	WorldObject.importResource(&GameResource);
-	WorldObject.createWorld();
+	WorldObject.importResource(&GameResource); //load resource pointers into World object
+	WorldObject.createWorld(); //initiate world object systems
 
+	////=================================MAIN GAME LOOP===============================================
 
-	//======CREATE PHEROMONE SYSTEM=====
-	PheroMatrix PheroTiles;
-	PheroTiles.initPheroMatrix(GameSetting::worldWidth, GameSetting::worldHeight, sf::Vector2u(300, 300)); //gamesetting: 1200x1200	
-
-	//======LOAD TEXTURE========//
-	sf::Texture skin;
-	std::cout << &skin << "\n";
-	if (!skin.loadFromFile("walk.png"))
-		std::cout << "unable to load skin. \n";
-
-	////=====WINDOW=======//
 	while (window.isOpen())
 	{
 		//////////////////////////////////////////////////////////////////////////////
@@ -137,7 +149,7 @@ int main()
 			if (event.type == sf::Event::Closed)
 				window.close();
 
-			//move screen
+			//move screen2
 
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 				view.move(0.0f, 20.0f);
@@ -400,8 +412,7 @@ int main()
 		view.zoom(zoom_factor);
 		window.setView(view);
 		zoom_factor = 1;
-
-
+				
 		// clear window 
 
 		window.clear(sf::Color::White);

@@ -23,7 +23,7 @@ public:
 
 
 private:
-	std::vector <Node> m_Nodes;
+	std::vector <Node> tileset;
 	bool m_diagonal{ false }; 
 	int m_num_neighbour = { 4 };
 	int m_totalNode = { 0 };
