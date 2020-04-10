@@ -57,7 +57,7 @@ void World::Update(float dt)
 
 void World::Draw(sf::RenderWindow &window)
 {
-	window.draw(*pheroSystem_ptr);
+	//window.draw(*pheroSystem_ptr);
 	pblockerSystem_ptr->windowDraw(window);
 	foodSystem_ptr->Draw(window);
 	colonySystem_ptr->drawColony(window);

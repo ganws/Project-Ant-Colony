@@ -375,7 +375,7 @@ int main()
 						//std::cout << Colony1.ant_skin << "\n";
 						break;
 					case TEXT_COMMAND::CLEARPHERO:
-						PheroTiles.resetPheromone();
+						//PheroTiles.resetPheromone();
 						break;
 					default:
 						std::cout << "COMMAND: Unknown";
@@ -420,6 +420,8 @@ int main()
 		// draw window
 
 		WorldObject.Draw(window);
+		if (show_pheromone)
+			window.draw(*WorldObject.pheroSystem_ptr);
 		window.draw(stat_antnum);
 		window.draw(stat_resource);
 

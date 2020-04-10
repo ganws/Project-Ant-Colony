@@ -2,6 +2,7 @@
 
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>	
+#include <list>
 
 class GameStateMachine
 {
